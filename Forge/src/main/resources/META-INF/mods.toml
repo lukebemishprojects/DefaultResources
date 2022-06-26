@@ -1,0 +1,28 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+issueTrackerURL = "https://github.com/lukebemish/defaultresources/issues"
+license = "LGPL v3"
+
+[[mods]]
+modId = "defaultresources"
+version = "${file.jarVersion}"
+displayName = "Default Resources"
+authors = "Luke Bemish"
+description = '''
+Description here
+'''
+# logoFile = "icon.png"
+
+[[dependencies.excavated_variants]]
+modId = "forge"
+mandatory = true
+versionRange = "[41.0.17,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.excavated_variants]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.19,)"
+ordering = "NONE"
+side = "BOTH"

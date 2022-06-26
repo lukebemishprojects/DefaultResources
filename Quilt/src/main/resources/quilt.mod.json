@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "quilt_loader": {
+    "group": "io.github.lukebemish.defaultresources",
+    "id": "defaultresources",
+    "version": "${version}",
+    "metadata": {
+      "name": "Default Resources",
+      "description": "Description",
+      "contributors": {
+        "Luke Bemish": "Author"
+      },
+      "contact": {
+        "sources": "https://github.com/lukebemish/defaultresources"
+      },
+      "icon": "icon.png"
+    },
+    "intermediate_mappings": "net.fabricmc:intermediary",
+    "entrypoints": {
+      "init": [
+        "io.github.lukebemish.defaultresources.quilt.DefaultResourcesQuilt"
+      ],
+      "client_init": [
+        "io.github.lukebemish.defaultresources.quilt.DefaultResourcesQuiltClient"
+      ]
+    },
+    "depends": [
+      {
+        "id": "quilt_loader",
+        "versions": ">=0.16.0-"
+      },
+      {
+        "id": "minecraft",
+        "versions": ">=1.19"
+      }
+    ]
+  }
+ }
