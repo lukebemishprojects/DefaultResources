@@ -32,21 +32,22 @@ public class PlatformImpl implements IPlatform {
         QuiltLoader.getAllMods().forEach(mod -> {
             String modid = mod.metadata().id();
             if (!modid.equals("minecraft")) {
-                Path defaultResources = mod.rootPath().resolve(DefaultResources.MOD_ID);
+                Path defaultResources = mod.rootPath().toAbsolutePath().resolve(DefaultResources.MOD_ID);
                 if (Files.exists(defaultResources) && !Cache.CACHE.modids.contains(modid)) {
                     Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modid);
                     if (!Files.exists(outPath)) {
                         try (var walk = Files.walk(defaultResources)) {
                             walk.forEach(p -> {
                                 try {
-                                    if (!Files.exists(p.getParent())) Files.createDirectories(p.getParent());
-                                    Path rel = defaultResources.relativize(p);
-                                    Files.copy(p, outPath.resolve(rel));
-                                } catch (IOException ignored) {
-                                }
+                                    if (!Files.isDirectory(p)) {
+                                        String rel = defaultResources.relativize(p).toString();
+                                        Path newPath = outPath.resolve(rel);
+                                        if (!Files.exists(newPath.getParent())) Files.createDirectories(newPath.getParent());
+                                        Files.copy(p, newPath);
+                                    }
+                                } catch (IOException ignored) {}
                             });
-                        } catch (IOException ignored) {
-                        }
+                        } catch (IOException ignored) {}
                     }
                 }
                 Cache.CACHE.modids.add(modid);

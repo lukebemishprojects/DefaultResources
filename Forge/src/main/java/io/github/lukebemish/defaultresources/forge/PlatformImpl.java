@@ -40,9 +40,12 @@ public class PlatformImpl implements IPlatform {
                             try (var walk = Files.walk(defaultResources)) {
                                 walk.forEach(p -> {
                                     try {
-                                        if (!Files.exists(p.getParent())) Files.createDirectories(p.getParent());
-                                        Path rel = defaultResources.relativize(p);
-                                        Files.copy(p, outPath.resolve(rel));
+                                        if (!Files.isDirectory(p)) {
+                                            String rel = defaultResources.relativize(p).toString();
+                                            Path newPath = outPath.resolve(rel);
+                                            if (!Files.exists(newPath.getParent())) Files.createDirectories(newPath.getParent());
+                                            Files.copy(p, newPath);
+                                        }
                                     } catch (IOException ignored) {
                                     }
                                 });
