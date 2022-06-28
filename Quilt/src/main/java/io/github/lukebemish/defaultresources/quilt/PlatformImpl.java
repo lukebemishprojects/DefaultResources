@@ -27,7 +27,8 @@ public class PlatformImpl implements IPlatform {
         try {
             if (!Files.exists(Services.PLATFORM.getGlobalFolder()))
                 Files.createDirectories(Services.PLATFORM.getGlobalFolder());
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            DefaultResources.LOGGER.error(e);
         }
         QuiltLoader.getAllMods().forEach(mod -> {
             String modid = mod.metadata().id();
@@ -45,9 +46,13 @@ public class PlatformImpl implements IPlatform {
                                         if (!Files.exists(newPath.getParent())) Files.createDirectories(newPath.getParent());
                                         Files.copy(p, newPath);
                                     }
-                                } catch (IOException ignored) {}
+                                } catch (IOException e) {
+                                    DefaultResources.LOGGER.error(e);
+                                }
                             });
-                        } catch (IOException ignored) {}
+                        } catch (IOException e) {
+                            DefaultResources.LOGGER.error(e);
+                        }
                     }
                 }
                 Cache.CACHE.modids.add(modid);

@@ -28,12 +28,13 @@ public class PlatformImpl implements IPlatform {
         try {
             if (!Files.exists(Services.PLATFORM.getGlobalFolder()))
                 Files.createDirectories(Services.PLATFORM.getGlobalFolder());
-        } catch (IOException ignored) {
+        } catch (IOException e) {
+            DefaultResources.LOGGER.error(e);
         }
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f->f.getMods().stream())
                 .filter(mod->!(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
                 .forEach(mod-> {
-                    Path defaultResources = mod.getOwningFile().getFile().getFilePath().resolve(DefaultResources.MOD_ID);
+                    Path defaultResources = mod.getOwningFile().getFile().findResource(DefaultResources.MOD_ID);
                     if (Files.exists(defaultResources) && !Cache.CACHE.modids.contains(mod.getModId())) {
                         Path outPath = Services.PLATFORM.getGlobalFolder().resolve(mod.getModId());
                         if (!Files.exists(outPath)) {
@@ -46,10 +47,12 @@ public class PlatformImpl implements IPlatform {
                                             if (!Files.exists(newPath.getParent())) Files.createDirectories(newPath.getParent());
                                             Files.copy(p, newPath);
                                         }
-                                    } catch (IOException ignored) {
+                                    } catch (IOException e) {
+                                        DefaultResources.LOGGER.error(e);
                                     }
                                 });
-                            } catch (IOException ignored) {
+                            } catch (IOException e) {
+                                DefaultResources.LOGGER.error(e);
                             }
                         }
                     }
