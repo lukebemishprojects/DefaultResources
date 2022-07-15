@@ -3,6 +3,7 @@ package io.github.lukebemish.defaultresources;
 import io.github.lukebemish.defaultresources.api.ResourceProvider;
 import io.github.lukebemish.defaultresources.impl.GroupedResourceProvider;
 import io.github.lukebemish.defaultresources.impl.PathResourceProvider;
+import io.github.lukebemish.defaultresources.impl.ZipResourceProvider;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,6 +26,8 @@ public class DefaultResources {
             paths.forEach(path -> {
                 if (Files.isDirectory(path)) {
                     providers.add(new PathResourceProvider(path));
+                } else if (path.getFileName().toString().endsWith(".zip")) {
+                    providers.add(new ZipResourceProvider(path));
                 }
             });
         } catch (IOException ignored) {

@@ -2,7 +2,7 @@ package io.github.lukebemish.defaultresources;
 
 import com.google.gson.JsonObject;
 import net.minecraft.SharedConstants;
-import net.minecraft.server.packs.FolderPackResources;
+import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.jetbrains.annotations.Nullable;
@@ -10,11 +10,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 
-public class AutoMetadataFolderPackResources extends FolderPackResources {
+public class AutoMetadataFilePackResources extends FilePackResources {
 
     private final PackType packType;
 
-    public AutoMetadataFolderPackResources(PackType packType, File file) {
+    public AutoMetadataFilePackResources(PackType packType, File file) {
         super(file);
         this.packType = packType;
     }

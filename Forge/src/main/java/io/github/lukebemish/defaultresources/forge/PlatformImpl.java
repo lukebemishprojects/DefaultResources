@@ -56,7 +56,8 @@ public class PlatformImpl implements IPlatform {
                             if (Files.exists(defaultResources) && !Files.exists(FMLPaths.CONFIGDIR.get().resolve(meta.configPath()))) {
                                 if (!meta.zip()) {
                                     Path outPath = Services.PLATFORM.getGlobalFolder().resolve(mod.getModId());
-                                    copyResources(defaultResources, outPath);
+                                    if (!Files.exists(outPath))
+                                        copyResources(defaultResources, outPath);
                                 } else {
                                     try (FileSystem zipFs = FileSystems.newFileSystem(
                                             URI.create("jar:" + Services.PLATFORM.getGlobalFolder().resolve(mod.getModId()+".zip").toAbsolutePath().toUri()),
@@ -74,23 +75,21 @@ public class PlatformImpl implements IPlatform {
     }
 
     private void copyResources(Path defaultResources, Path outPath) {
-        if (!Files.exists(outPath)) {
-            try (var walk = Files.walk(defaultResources)) {
-                walk.forEach(p -> {
-                    try {
-                        if (!Files.isDirectory(p)) {
-                            String rel = defaultResources.relativize(p).toString();
-                            Path newPath = outPath.resolve(rel);
-                            if (!Files.exists(newPath.getParent())) Files.createDirectories(newPath.getParent());
-                            Files.copy(p, newPath);
-                        }
-                    } catch (IOException e) {
-                        DefaultResources.LOGGER.error(e);
+        try (var walk = Files.walk(defaultResources)) {
+            walk.forEach(p -> {
+                try {
+                    if (!Files.isDirectory(p)) {
+                        String rel = defaultResources.relativize(p).toString();
+                        Path newPath = outPath.resolve(rel);
+                        if (!Files.exists(newPath.getParent())) Files.createDirectories(newPath.getParent());
+                        Files.copy(p, newPath);
                     }
-                });
-            } catch (IOException e) {
-                DefaultResources.LOGGER.error(e);
-            }
+                } catch (IOException e) {
+                    DefaultResources.LOGGER.error(e);
+                }
+            });
+        } catch (IOException e) {
+            DefaultResources.LOGGER.error(e);
         }
     }
 

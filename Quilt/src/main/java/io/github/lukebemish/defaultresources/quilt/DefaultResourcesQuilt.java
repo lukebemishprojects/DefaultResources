@@ -1,5 +1,6 @@
 package io.github.lukebemish.defaultresources.quilt;
 
+import io.github.lukebemish.defaultresources.AutoMetadataFilePackResources;
 import io.github.lukebemish.defaultresources.AutoMetadataFolderPackResources;
 import io.github.lukebemish.defaultresources.DefaultResources;
 import io.github.lukebemish.defaultresources.Services;
@@ -38,9 +39,13 @@ public class DefaultResourcesQuilt implements ModInitializer {
                     List<PackResources> packs = new ArrayList<>();
                     try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
                         for (var file : files.toList()) {
-                            if (!Files.isDirectory(file)) continue;
-                            AutoMetadataFolderPackResources packResources = new AutoMetadataFolderPackResources(type, file.toFile());
-                            packs.add(packResources);
+                            if (Files.isDirectory(file)) {
+                                AutoMetadataFolderPackResources packResources = new AutoMetadataFolderPackResources(type, file.toFile());
+                                packs.add(packResources);
+                            } else if (file.getFileName().endsWith(".zip")) {
+                                AutoMetadataFilePackResources packResources = new AutoMetadataFilePackResources(type, file.toFile());
+                                packs.add(packResources);
+                            }
                         }
                     } catch (IOException ignored) {
                     }
