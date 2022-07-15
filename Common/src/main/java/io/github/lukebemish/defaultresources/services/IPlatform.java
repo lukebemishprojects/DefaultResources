@@ -11,6 +11,4 @@ public interface IPlatform {
     void extractResources();
 
     Collection<ResourceProvider> getJarProviders();
-
-    Path getCacheFolder();
 }

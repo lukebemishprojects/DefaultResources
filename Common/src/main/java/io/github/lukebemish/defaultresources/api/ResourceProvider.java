@@ -11,6 +11,13 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public interface ResourceProvider {
+    /**
+     * This should be run before your config file is written too, to ensure that DefaultResources takes it into account
+     * when figuring out whether to extract default resources.
+     */
+    static void forceInitialization() {
+        ResourceProvider.instance();
+    }
 
     static ResourceProvider instance() {
         if (DefaultResources.RESOURCE_PROVIDER == null) {

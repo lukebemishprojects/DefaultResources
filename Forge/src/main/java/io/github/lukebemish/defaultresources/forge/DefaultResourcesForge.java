@@ -15,7 +15,7 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.resource.DelegatingResourcePack;
+import net.minecraftforge.resource.DelegatingPackResources;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -48,7 +48,7 @@ public class DefaultResourcesForge {
                     } catch (IOException ignored) {
 
                     }
-                    return new DelegatingResourcePack(DefaultResources.MOD_ID+"_global", "Global Resources",
+                    return new DelegatingPackResources(DefaultResources.MOD_ID+"_global", "Global Resources",
                             new PackMetadataSection(Component.literal("Global Resources"), event.getPackType().getVersion(SharedConstants.getCurrentVersion())), packs);
                 }, constructor, Pack.Position.TOP, PackSource.DEFAULT);
                 packConsumer.accept(pack);
