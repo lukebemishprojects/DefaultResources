@@ -42,9 +42,9 @@ public class Cache {
     }
 
     public void save() {
-        Path path = Services.PLATFORM.getGlobalFolder().resolve(DefaultResources.CACHE);
+        Path path = Services.PLATFORM.getCacheFolder().resolve(DefaultResources.CACHE);
         try {
-            if (!Files.exists(Services.PLATFORM.getGlobalFolder())) Files.createDirectories(Services.PLATFORM.getGlobalFolder());
+            if (!Files.exists(Services.PLATFORM.getCacheFolder())) Files.createDirectories(Services.PLATFORM.getCacheFolder());
             JsonElement json = CODEC.encodeStart(JsonOps.INSTANCE,this).getOrThrow(false,e->{});
             FileWriter w = new FileWriter(path.toFile());
             GSON.toJson(json, w);

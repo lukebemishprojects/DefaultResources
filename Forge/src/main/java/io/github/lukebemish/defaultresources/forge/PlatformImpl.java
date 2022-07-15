@@ -70,4 +70,9 @@ public class PlatformImpl implements IPlatform {
                         providers.add(new PathResourceProvider(mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/")))));
         return providers;
     }
+
+    @Override
+    public Path getCacheFolder() {
+        return FMLPaths.GAMEDIR.get().resolve("mod_data/defaultresources");
+    }
 }

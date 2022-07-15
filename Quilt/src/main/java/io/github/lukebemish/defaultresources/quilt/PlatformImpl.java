@@ -72,4 +72,9 @@ public class PlatformImpl implements IPlatform {
         });
         return providers;
     }
+
+    @Override
+    public Path getCacheFolder() {
+        return QuiltLoader.getGameDir().resolve("mod_data/defaultresources");
+    }
 }
