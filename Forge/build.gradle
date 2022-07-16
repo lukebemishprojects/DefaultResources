@@ -95,8 +95,6 @@ dependencies {
     annotationProcessor group:'com.google.auto.service', name:'auto-service', version:'1.0.1'
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-
-    compileOnly(fg.deobf("curse.maven:hyle-609850:3748968"))
 }
 
 mixin {
