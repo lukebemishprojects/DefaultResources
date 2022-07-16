@@ -42,7 +42,7 @@ public class DefaultResourcesQuilt implements ModInitializer {
                             if (Files.isDirectory(file)) {
                                 AutoMetadataFolderPackResources packResources = new AutoMetadataFolderPackResources(type, file.toFile());
                                 packs.add(packResources);
-                            } else if (file.getFileName().endsWith(".zip")) {
+                            } else if (file.getFileName().toString().endsWith(".zip")) {
                                 AutoMetadataFilePackResources packResources = new AutoMetadataFilePackResources(type, file.toFile());
                                 packs.add(packResources);
                             }

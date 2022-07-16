@@ -6,7 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.github.lukebemish.defaultresources.DefaultResources;
-import io.github.lukebemish.defaultresources.ModMetaFile;
+import io.github.lukebemish.defaultresources.api.ModMetaFile;
 import io.github.lukebemish.defaultresources.Services;
 import io.github.lukebemish.defaultresources.api.ResourceProvider;
 import io.github.lukebemish.defaultresources.impl.PathResourceProvider;
