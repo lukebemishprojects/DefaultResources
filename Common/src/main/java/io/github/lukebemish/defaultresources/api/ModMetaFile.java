@@ -3,6 +3,7 @@ package io.github.lukebemish.defaultresources.api;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import io.github.lukebemish.defaultresources.DefaultResources;
+import org.jetbrains.annotations.ApiStatus;
 
 /**
  * Your mod's `defaultresources.meta.json` will get read according to this format.
@@ -18,4 +19,7 @@ public record ModMetaFile(String configPath, String resourcesPath, boolean zip) 
             Codec.STRING.optionalFieldOf("resources_path", DefaultResources.MOD_ID).forGetter(ModMetaFile::configPath),
             Codec.BOOL.optionalFieldOf("zip", true).forGetter(ModMetaFile::zip)
     ).apply(instance, ModMetaFile::new));
+
+    @ApiStatus.Internal
+    public ModMetaFile {}
 }
