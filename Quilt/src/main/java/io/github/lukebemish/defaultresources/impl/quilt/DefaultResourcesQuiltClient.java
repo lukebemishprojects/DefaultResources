@@ -1,4 +1,4 @@
-package io.github.lukebemish.defaultresources.quilt;
+package io.github.lukebemish.defaultresources.impl.quilt;
 
 import net.minecraft.server.packs.PackType;
 import org.quiltmc.loader.api.ModContainer;

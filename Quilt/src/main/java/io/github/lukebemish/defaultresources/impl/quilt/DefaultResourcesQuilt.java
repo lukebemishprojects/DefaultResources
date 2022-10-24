@@ -1,9 +1,9 @@
-package io.github.lukebemish.defaultresources.quilt;
+package io.github.lukebemish.defaultresources.impl.quilt;
 
-import io.github.lukebemish.defaultresources.AutoMetadataFilePackResources;
-import io.github.lukebemish.defaultresources.AutoMetadataFolderPackResources;
-import io.github.lukebemish.defaultresources.DefaultResources;
-import io.github.lukebemish.defaultresources.Services;
+import io.github.lukebemish.defaultresources.impl.AutoMetadataFilePackResources;
+import io.github.lukebemish.defaultresources.impl.AutoMetadataFolderPackResources;
+import io.github.lukebemish.defaultresources.impl.DefaultResources;
+import io.github.lukebemish.defaultresources.impl.Services;
 import io.github.lukebemish.defaultresources.api.ResourceProvider;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;

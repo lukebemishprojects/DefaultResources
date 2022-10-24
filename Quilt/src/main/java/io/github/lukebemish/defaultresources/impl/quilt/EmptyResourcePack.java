@@ -1,4 +1,4 @@
-package io.github.lukebemish.defaultresources.quilt;
+package io.github.lukebemish.defaultresources.impl.quilt;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;

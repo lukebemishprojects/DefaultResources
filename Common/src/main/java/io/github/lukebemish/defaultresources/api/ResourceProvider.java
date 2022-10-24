@@ -1,7 +1,7 @@
 package io.github.lukebemish.defaultresources.api;
 
-import io.github.lukebemish.defaultresources.DefaultResources;
-import io.github.lukebemish.defaultresources.Services;
+import io.github.lukebemish.defaultresources.impl.DefaultResources;
+import io.github.lukebemish.defaultresources.impl.Services;
 import net.minecraft.resources.ResourceLocation;
 import org.jetbrains.annotations.NotNull;
 
