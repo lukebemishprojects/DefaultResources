@@ -1,6 +1,6 @@
-package io.github.lukebemish.defaultresources;
+package io.github.lukebemish.defaultresources.impl;
 
-import io.github.lukebemish.defaultresources.services.IPlatform;
+import io.github.lukebemish.defaultresources.impl.services.IPlatform;
 
 import java.util.ServiceLoader;
 
