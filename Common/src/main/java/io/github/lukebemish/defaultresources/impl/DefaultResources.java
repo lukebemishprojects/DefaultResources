@@ -77,6 +77,21 @@ public class DefaultResources {
                                 copyResources(defaultResources, outPath);
                             }
                         }
+                        if (meta.createsMarker() && !Files.exists(configDir.resolve(meta.configPath()))) {
+                            try {
+                                Path markerPath = configDir.resolve(meta.configPath());
+                                String comment;
+                                if (meta.configPath().endsWith(".json5") || meta.configPath().endsWith(".json"))
+                                    comment = "// ";
+                                else if (meta.configPath().endsWith(".toml"))
+                                    comment = "# ";
+                                else
+                                    comment = "";
+                                Files.writeString(markerPath, comment + "This is a marker file created by "+modId+". If the mod is marked as already extracted, default resources will not be re-extracted while this file exists.\n");
+                            } catch (IOException e) {
+                                LOGGER.error("Issues writing marker file at {} for mod {}: ",meta.configPath(), modId, e);
+                            }
+                        }
                     }
                 }
             } catch (IOException | RuntimeException e) {
