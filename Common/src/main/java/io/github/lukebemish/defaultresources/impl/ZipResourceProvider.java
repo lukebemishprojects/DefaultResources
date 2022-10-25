@@ -1,6 +1,7 @@
 package io.github.lukebemish.defaultresources.impl;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
+
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystem;

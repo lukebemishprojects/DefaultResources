@@ -25,7 +25,7 @@ import java.util.List;
 public class DefaultResourcesQuilt implements ModInitializer {
     @Override
     public void onInitialize(ModContainer mod) {
-        ResourceProvider.instance();
+        ResourceProvider.forceInitialization();
         addPackResources(PackType.SERVER_DATA);
     }
 

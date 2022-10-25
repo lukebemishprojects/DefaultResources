@@ -23,9 +23,11 @@ public interface ResourceProvider {
      * Use this to get an instance of a ResourceProvider to get resources from.
      * @return A ResourceProvider grouping resources from mod jars and the `globalresources` directory.
      */
+    @SuppressWarnings("UnusedReturnValue")
     static ResourceProvider instance() {
         if (DefaultResources.RESOURCE_PROVIDER == null) {
             Services.PLATFORM.extractResources();
+            DefaultResources.cleanupExtraction();
             DefaultResources.RESOURCE_PROVIDER = DefaultResources.assembleResourceProvider();
         }
         return DefaultResources.RESOURCE_PROVIDER;
