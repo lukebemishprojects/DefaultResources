@@ -18,10 +18,10 @@
     "intermediate_mappings": "net.fabricmc:intermediary",
     "entrypoints": {
       "init": [
-        "io.github.lukebemish.defaultresources.quilt.DefaultResourcesQuilt"
+        "io.github.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuilt"
       ],
       "client_init": [
-        "io.github.lukebemish.defaultresources.quilt.DefaultResourcesQuiltClient"
+        "io.github.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuiltClient"
       ]
     },
     "depends": [

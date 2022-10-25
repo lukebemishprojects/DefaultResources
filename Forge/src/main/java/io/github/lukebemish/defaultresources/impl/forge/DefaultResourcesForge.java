@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 public class DefaultResourcesForge {
 
     public DefaultResourcesForge() {
-        ResourceProvider.instance();
+        ResourceProvider.forceInitialization();
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         modbus.register(this);
     }

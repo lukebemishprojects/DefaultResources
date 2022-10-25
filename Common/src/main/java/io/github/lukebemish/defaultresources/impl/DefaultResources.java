@@ -27,12 +27,16 @@ public class DefaultResources {
     public static final String MOD_ID = "defaultresources";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
+    public static final String META_FILE_PATH = DefaultResources.MOD_ID+".meta.json";
+
     public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
 
     public static ResourceProvider RESOURCE_PROVIDER;
 
+    private static final List<ResourceProvider> QUEUED_PROVIDERS = new ArrayList<>();
+
     public static ResourceProvider assembleResourceProvider() {
-        List<ResourceProvider> providers = new ArrayList<>();
+        List<ResourceProvider> providers = new ArrayList<>(QUEUED_PROVIDERS);
         try (var paths = Files.list(Services.PLATFORM.getGlobalFolder())) {
             paths.forEach(path -> {
                 if (Files.isDirectory(path)) {
@@ -48,24 +52,30 @@ public class DefaultResources {
     }
 
     public static void forMod(Path configDir, Function<String, Path> inJarPathGetter, String modId) {
-        Path defaultResourcesMeta = inJarPathGetter.apply(DefaultResources.MOD_ID+".meta.json");
+        Path defaultResourcesMeta = inJarPathGetter.apply(META_FILE_PATH);
         if (Files.exists(defaultResourcesMeta)) {
             try (InputStream is = Files.newInputStream(defaultResourcesMeta)) {
                 JsonObject obj = GSON.fromJson(new BufferedReader(new InputStreamReader(is)),JsonObject.class);
                 ModMetaFile meta = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> {});
                 Path defaultResources = inJarPathGetter.apply(meta.resourcesPath());
 
-                if (Files.exists(defaultResources) && !Files.exists(configDir.resolve(meta.configPath()))) {
-                    if (!meta.zip()) {
-                        Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modId);
-                        if (!Files.exists(outPath))
-                            copyResources(defaultResources, outPath);
-                    } else {
-                        try (FileSystem zipFs = FileSystems.newFileSystem(
-                                URI.create("jar:" + Services.PLATFORM.getGlobalFolder().resolve(modId+".zip").toAbsolutePath().toUri()),
-                                Collections.singletonMap("create", "true"))) {
-                            Path outPath = zipFs.getPath("/");
-                            copyResources(defaultResources, outPath);
+                if (Files.exists(defaultResources)) {
+                    Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, Config.ExtractionState.UNEXTRACTED);
+                    if (extractionState == Config.ExtractionState.UNEXTRACTED) {
+                        QUEUED_PROVIDERS.add(new PathResourceProvider(defaultResources));
+                    } else if ((!Files.exists(configDir.resolve(meta.configPath())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
+                        Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
+                        if (!meta.zip()) {
+                            Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modId);
+                            if (!Files.exists(outPath))
+                                copyResources(defaultResources, outPath);
+                        } else {
+                            try (FileSystem zipFs = FileSystems.newFileSystem(
+                                    URI.create("jar:" + Services.PLATFORM.getGlobalFolder().resolve(modId + ".zip").toAbsolutePath().toUri()),
+                                    Collections.singletonMap("create", "true"))) {
+                                Path outPath = zipFs.getPath("/");
+                                copyResources(defaultResources, outPath);
+                            }
                         }
                     }
                 }
@@ -92,5 +102,9 @@ public class DefaultResources {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
+    }
+
+    public static void cleanupExtraction() {
+        Config.INSTANCE.get().save();
     }
 }
