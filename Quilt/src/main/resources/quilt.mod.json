@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "quilt_loader": {
-    "group": "io.github.lukebemish.defaultresources",
+    "group": "dev.lukebemish.defaultresources",
     "id": "defaultresources",
     "version": "${version}",
     "metadata": {
@@ -18,10 +18,10 @@
     "intermediate_mappings": "net.fabricmc:intermediary",
     "entrypoints": {
       "init": [
-        "io.github.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuilt"
+        "dev.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuilt"
       ],
       "client_init": [
-        "io.github.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuiltClient"
+        "dev.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuiltClient"
       ]
     },
     "depends": [
