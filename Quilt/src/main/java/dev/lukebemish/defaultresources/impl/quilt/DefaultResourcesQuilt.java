@@ -32,25 +32,25 @@ public class DefaultResourcesQuilt implements ModInitializer {
     public static void addPackResources(PackType type) {
         try {
             if (!Files.exists(Services.PLATFORM.getGlobalFolder())) Files.createDirectories(Services.PLATFORM.getGlobalFolder());
-            ResourceLoader.get(type).registerResourcePackProfileProvider((infoConsumer, infoFactory) -> {
-                Pack pack = Pack.create(DefaultResources.MOD_ID, true, () -> {
-                    EmptyResourcePack core = new EmptyResourcePack(DefaultResources.MOD_ID + "_global", "Global Resources",
+            ResourceLoader.get(type).registerResourcePackProfileProvider((infoConsumer) -> {
+                Pack pack = Pack.readMetaAndCreate(DefaultResources.MOD_ID, Component.literal("Global Resources"), true, s -> {
+                    EmptyResourcePack core = new EmptyResourcePack(DefaultResources.MOD_ID + "_global",
                             new PackMetadataSection(Component.literal("Global Resources"), type.getVersion(SharedConstants.getCurrentVersion())));
                     List<PackResources> packs = new ArrayList<>();
                     try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
                         for (var file : files.toList()) {
                             if (Files.isDirectory(file)) {
-                                AutoMetadataFolderPackResources packResources = new AutoMetadataFolderPackResources(type, file.toFile());
+                                AutoMetadataFolderPackResources packResources = new AutoMetadataFolderPackResources(s, type, file);
                                 packs.add(packResources);
                             } else if (file.getFileName().toString().endsWith(".zip")) {
-                                AutoMetadataFilePackResources packResources = new AutoMetadataFilePackResources(type, file.toFile());
+                                AutoMetadataFilePackResources packResources = new AutoMetadataFilePackResources(s, type, file.toFile());
                                 packs.add(packResources);
                             }
                         }
                     } catch (IOException ignored) {
                     }
                     return new GroupResourcePack.Wrapped(type, core, packs, false);
-                }, infoFactory, Pack.Position.TOP, PackSource.DEFAULT);
+                }, type, Pack.Position.TOP, PackSource.DEFAULT);
                 infoConsumer.accept(pack);
             });
         } catch (IOException e) {

@@ -3,71 +3,48 @@ package dev.lukebemish.defaultresources.impl.quilt;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.ResourcePackFileNotFoundException;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
+import net.minecraft.server.packs.resources.IoSupplier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.function.Predicate;
+
 
 public class EmptyResourcePack extends AbstractPackResources {
 
     private final PackMetadataSection metadata;
-    private final String name;
 
-    public EmptyResourcePack(String id, String name, PackMetadataSection metadata) {
-        super(new File(id));
+    public EmptyResourcePack(String id, PackMetadataSection metadata) {
+        super(id, false);
         this.metadata = metadata;
-        this.name = name;
-    }
-
-    @Nullable
-    @Override
-    public InputStream getRootResource(String fileName) throws IOException {
-        throw new ResourcePackFileNotFoundException(this.file, fileName);
     }
 
     @Override
-    protected boolean hasResource(String resourcePath) {
-        return false;
+    public IoSupplier<InputStream> getRootResource(String @NotNull ... fileName) {
+        return null;
     }
 
     @Override
-    public InputStream getResource(PackType type, ResourceLocation location) throws IOException {
-        throw new ResourcePackFileNotFoundException(this.file, getFullPath(type, location));
+    public IoSupplier<InputStream> getResource(@NotNull PackType type, @NotNull ResourceLocation location) {
+        return null;
     }
 
     @Override
-    public Collection<ResourceLocation> getResources(PackType packType, String string, String string2, Predicate<ResourceLocation> predicate) {
-        return List.of();
-    }
+    public void listResources(@NotNull PackType packType, @NotNull String string, @NotNull String string2, @NotNull ResourceOutput resourceOutput) {
 
-    @Override
-    public boolean hasResource(PackType type, ResourceLocation location) {
-        return false;
     }
-
     @Override
-    protected InputStream getResource(String resourcePath) throws IOException {
-        throw new ResourcePackFileNotFoundException(this.file, resourcePath);
-    }
-
-    @Override
-    public Set<String> getNamespaces(PackType type) {
+    public @NotNull Set<String> getNamespaces(@NotNull PackType type) {
         return Set.of();
     }
 
     @Nullable
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> deserializer) throws IOException {
+    public <T> T getMetadataSection(MetadataSectionSerializer<T> deserializer) {
         if (deserializer.getMetadataSectionName().equals("pack"))
         {
             return (T) metadata;
@@ -76,18 +53,7 @@ public class EmptyResourcePack extends AbstractPackResources {
     }
 
     @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
     public void close() {
 
-    }
-
-    private static String getFullPath(PackType type, ResourceLocation location)
-    {
-        // stolen from ResourcePack
-        return String.format(Locale.ROOT, "%s/%s/%s", type.getDirectory(), location.getNamespace(), location.getPath());
     }
 }

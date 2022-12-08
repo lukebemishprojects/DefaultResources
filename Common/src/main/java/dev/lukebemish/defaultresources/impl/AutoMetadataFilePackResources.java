@@ -8,20 +8,19 @@ import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.io.IOException;
 
 public class AutoMetadataFilePackResources extends FilePackResources {
 
     private final PackType packType;
 
-    public AutoMetadataFilePackResources(PackType packType, File file) {
-        super(file);
+    public AutoMetadataFilePackResources(String s, PackType packType, File file) {
+        super(s, file, false);
         this.packType = packType;
     }
 
     @Nullable
     @Override
-    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) throws IOException {
+    public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         if(serializer.getMetadataSectionName().equals("pack")) {
             JsonObject object = new JsonObject();
             object.addProperty("pack_format", this.packType.getVersion(SharedConstants.getCurrentVersion()));
