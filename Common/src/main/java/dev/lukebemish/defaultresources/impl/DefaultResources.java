@@ -3,11 +3,16 @@ package dev.lukebemish.defaultresources.impl;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
 import dev.lukebemish.defaultresources.api.ModMetaFile;
 import dev.lukebemish.defaultresources.api.ResourceProvider;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,9 +23,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 public class DefaultResources {
@@ -34,6 +38,7 @@ public class DefaultResources {
     public static ResourceProvider RESOURCE_PROVIDER;
 
     private static final List<ResourceProvider> QUEUED_PROVIDERS = new ArrayList<>();
+    private static final Map<String, BiFunction<String, PackType, PackResources>> QUEUED_RESOURCES = new HashMap<>();
 
     public static ResourceProvider assembleResourceProvider() {
         List<ResourceProvider> providers = new ArrayList<>(QUEUED_PROVIDERS);
@@ -63,6 +68,7 @@ public class DefaultResources {
                     Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, Config.ExtractionState.UNEXTRACTED);
                     if (extractionState == Config.ExtractionState.UNEXTRACTED) {
                         QUEUED_PROVIDERS.add(new PathResourceProvider(defaultResources));
+                        QUEUED_RESOURCES.put("__extracted_"+modId, (s, type) -> new AutoMetadataFolderPackResources(s, type, defaultResources));
                     } else if ((!Files.exists(configDir.resolve(meta.configPath())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
                         Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
                         if (!meta.zip()) {
@@ -121,5 +127,25 @@ public class DefaultResources {
 
     public static void cleanupExtraction() {
         Config.INSTANCE.get().save();
+    }
+
+    @NotNull
+    public static List<Pair<String, Pack.ResourcesSupplier>> getPackResources(PackType type) {
+        List<Pair<String,Pack.ResourcesSupplier>> packs = new ArrayList<>();
+        try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
+            for (var file : files.toList()) {
+                if (Files.isDirectory(file)) {
+                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataFolderPackResources(s, type, file);
+                    packs.add(new Pair<>(file.getFileName().toString(),packResources));
+                } else if (file.getFileName().toString().endsWith(".zip")) {
+                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataFilePackResources(s, type, file.toFile());
+                    packs.add(new Pair<>(file.getFileName().toString(),packResources));
+                }
+            }
+        } catch (IOException ignored) {
+
+        }
+        QUEUED_RESOURCES.forEach((s, biFunction) -> packs.add(new Pair<>(s, str ->biFunction.apply(str, type))));
+        return packs;
     }
 }
