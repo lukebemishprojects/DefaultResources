@@ -26,6 +26,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class DefaultResources {
     public static final String MOD_ID = "defaultresources";
@@ -38,7 +39,7 @@ public class DefaultResources {
     public static ResourceProvider RESOURCE_PROVIDER;
 
     private static final List<ResourceProvider> QUEUED_PROVIDERS = new ArrayList<>();
-    private static final Map<String, BiFunction<String, PackType, PackResources>> QUEUED_RESOURCES = new HashMap<>();
+    private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_RESOURCES = new HashMap<>();
 
     public static ResourceProvider assembleResourceProvider() {
         List<ResourceProvider> providers = new ArrayList<>(QUEUED_PROVIDERS);
@@ -68,7 +69,10 @@ public class DefaultResources {
                     Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, Config.ExtractionState.UNEXTRACTED);
                     if (extractionState == Config.ExtractionState.UNEXTRACTED) {
                         QUEUED_PROVIDERS.add(new PathResourceProvider(defaultResources));
-                        QUEUED_RESOURCES.put("__extracted_"+modId, (s, type) -> new AutoMetadataFolderPackResources(s, type, defaultResources));
+                        QUEUED_RESOURCES.put("__extracted_"+modId, (s, type) -> {
+                            if (!Files.exists(defaultResources.resolve(type.getDirectory()))) return null;
+                            return () -> new AutoMetadataFolderPackResources(s, type, defaultResources);
+                        });
                     } else if ((!Files.exists(configDir.resolve(meta.configPath())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
                         Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
                         if (!meta.zip()) {
@@ -145,7 +149,11 @@ public class DefaultResources {
         } catch (IOException ignored) {
 
         }
-        QUEUED_RESOURCES.forEach((s, biFunction) -> packs.add(new Pair<>(s, str ->biFunction.apply(str, type))));
+        QUEUED_RESOURCES.forEach((s, biFunction) -> {
+            Supplier<PackResources> resources = biFunction.apply(s, type);
+            if (resources == null) return;
+            packs.add(new Pair<>(s, str -> resources.get()));
+        });
         return packs;
     }
 }
