@@ -1,10 +1,20 @@
-subprojects {
+plugins {
+    id 'org.cadixdev.licenser' version '0.6.1' apply false
+}
 
+subprojects { p ->
+    apply plugin: 'maven-publish'
+    apply plugin: 'java-library'
     apply plugin: 'java'
+    apply plugin: 'org.cadixdev.licenser'
     
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
+
+    license {
+        header = rootProject.file('header.txt')
+    }
         
     jar {
         manifest {
@@ -82,5 +92,18 @@ subprojects {
     // other mod developers.
     tasks.withType(GenerateModuleMetadata) {
         enabled = false
+    }
+
+    publishing {
+        repositories {
+            maven {
+                name = 'PersonalMaven'
+                url = uri('https://maven.lukebemish.dev/releases')
+                credentials {
+                    username = findProperty('lukebemishMavenUser') ?: ''
+                    password = findProperty('lukebemishMavenPassword') ?: ''
+                }
+            }
+        }
     }
 }

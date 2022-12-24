@@ -109,6 +109,13 @@ processResources {
     from project(":Common").sourceSets.main.resources
 }
 
+sourcesJar {
+    from project(":Common").sourceSets.main.allSource
+}
+
+javadocJar {
+    from project(":Common").sourceSets.main.allJava
+}
 
 jar.finalizedBy('reobfJar')
 
@@ -119,6 +126,8 @@ publishing {
             artifactId project.archivesBaseName
             version project.version
             artifact jar
+            artifact sourcesJar
+            artifact javadocJar
         }
     }
     repositories {

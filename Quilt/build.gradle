@@ -63,16 +63,19 @@ loom {
 }
 
 processResources {
-    from project(":Common").sourceSets.main.resources
-	inputs.property "version", project.version
-
-	filesMatching("quilt.mod.json") {
-		expand "version": project.version
-	}
+	from project(":Common").sourceSets.main.resources
 }
 
 tasks.withType(JavaCompile) {
-    source(project(":Common").sourceSets.main.allSource)
+	source(project(":Common").sourceSets.main.allSource)
+}
+
+sourcesJar {
+	from project(":Common").sourceSets.main.allSource
+}
+
+javadocJar {
+	from project(":Common").sourceSets.main.allJava
 }
 
 jar {
@@ -81,17 +84,19 @@ jar {
 	}
 }
 
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId project.group
-            artifactId project.archivesBaseName
-            version project.version
-            from components.java
-        }
-    }
+tasks.jar.finalizedBy(tasks.remapJar)
 
-    repositories {
-    }
+publishing {
+	publications {
+		mavenJava(MavenPublication) {
+			groupId project.group
+			artifactId project.archivesBaseName
+			version project.version
+			from components.java
+		}
+	}
+
+	repositories {
+	}
 }
 
