@@ -31,6 +31,8 @@ pluginManagement {
             url = 'https://server.bbkr.space/artifactory/libs-release/'
         }
 
+        maven { url = 'https://maven.moddinginquisition.org/releases' }
+
         mavenCentral()
         gradlePluginPortal()
     }
