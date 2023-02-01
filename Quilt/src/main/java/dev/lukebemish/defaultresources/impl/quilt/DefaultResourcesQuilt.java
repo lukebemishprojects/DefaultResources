@@ -28,7 +28,8 @@ public class DefaultResourcesQuilt implements ModInitializer {
 
     public static void addPackResources(PackType type) {
         try {
-            if (!Files.exists(Services.PLATFORM.getGlobalFolder())) Files.createDirectories(Services.PLATFORM.getGlobalFolder());
+            if (!Files.exists(Services.PLATFORM.getGlobalFolder()))
+                Files.createDirectories(Services.PLATFORM.getGlobalFolder());
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

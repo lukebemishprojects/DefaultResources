@@ -24,11 +24,11 @@ public class GroupedResourceProvider implements ResourceProvider {
 
     @Override
     public @NotNull Collection<ResourceLocation> getResources(String packType, String prefix, Predicate<ResourceLocation> predicate) {
-        return deferrals.stream().flatMap(p->p.getResources(packType,prefix,predicate).stream()).toList();
+        return deferrals.stream().flatMap(p -> p.getResources(packType, prefix, predicate).stream()).toList();
     }
 
     @Override
     public @NotNull Stream<? extends InputStream> getResourceStreams(String packType, ResourceLocation location) {
-        return deferrals.stream().flatMap(p->p.getResourceStreams(packType,location));
+        return deferrals.stream().flatMap(p -> p.getResourceStreams(packType, location));
     }
 }

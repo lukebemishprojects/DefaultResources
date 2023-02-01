@@ -37,7 +37,7 @@ public class DefaultResources {
     public static final String MOD_ID = "defaultresources";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-    public static final String META_FILE_PATH = DefaultResources.MOD_ID+".meta.json";
+    public static final String META_FILE_PATH = DefaultResources.MOD_ID + ".meta.json";
 
     public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
 
@@ -66,15 +66,16 @@ public class DefaultResources {
         Path defaultResourcesMeta = inJarPathGetter.apply(META_FILE_PATH);
         if (Files.exists(defaultResourcesMeta)) {
             try (InputStream is = Files.newInputStream(defaultResourcesMeta)) {
-                JsonObject obj = GSON.fromJson(new BufferedReader(new InputStreamReader(is)),JsonObject.class);
-                ModMetaFile meta = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> {});
+                JsonObject obj = GSON.fromJson(new BufferedReader(new InputStreamReader(is)), JsonObject.class);
+                ModMetaFile meta = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, obj).getOrThrow(false, e -> {
+                });
                 Path defaultResources = inJarPathGetter.apply(meta.resourcesPath());
 
                 if (Files.exists(defaultResources)) {
                     Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, Config.ExtractionState.UNEXTRACTED);
                     if (extractionState == Config.ExtractionState.UNEXTRACTED) {
                         QUEUED_PROVIDERS.add(new PathResourceProvider(defaultResources));
-                        QUEUED_RESOURCES.put("__extracted_"+modId, (s, type) -> {
+                        QUEUED_RESOURCES.put("__extracted_" + modId, (s, type) -> {
                             if (!Files.exists(defaultResources.resolve(type.getDirectory()))) return null;
                             return () -> new AutoMetadataFolderPackResources(s, type, defaultResources);
                         });
@@ -86,8 +87,8 @@ public class DefaultResources {
                                 copyResources(defaultResources, outPath);
                         } else {
                             try (FileSystem zipFs = FileSystems.newFileSystem(
-                                    URI.create("jar:" + Services.PLATFORM.getGlobalFolder().resolve(modId + ".zip").toAbsolutePath().toUri()),
-                                    Collections.singletonMap("create", "true"))) {
+                                URI.create("jar:" + Services.PLATFORM.getGlobalFolder().resolve(modId + ".zip").toAbsolutePath().toUri()),
+                                Collections.singletonMap("create", "true"))) {
                                 Path outPath = zipFs.getPath("/");
                                 copyResources(defaultResources, outPath);
                             }
@@ -102,15 +103,15 @@ public class DefaultResources {
                                     comment = "# ";
                                 else
                                     comment = "";
-                                Files.writeString(markerPath, comment + "This is a marker file created by "+modId+". If the mod is marked as already extracted, default resources will not be re-extracted while this file exists.\n");
+                                Files.writeString(markerPath, comment + "This is a marker file created by " + modId + ". If the mod is marked as already extracted, default resources will not be re-extracted while this file exists.\n");
                             } catch (IOException e) {
-                                LOGGER.error("Issues writing marker file at {} for mod {}: ",meta.configPath(), modId, e);
+                                LOGGER.error("Issues writing marker file at {} for mod {}: ", meta.configPath(), modId, e);
                             }
                         }
                     }
                 }
             } catch (IOException | RuntimeException e) {
-                DefaultResources.LOGGER.error("Could not read meta file for mod {}",modId,e);
+                DefaultResources.LOGGER.error("Could not read meta file for mod {}", modId, e);
             }
         }
     }
@@ -140,15 +141,15 @@ public class DefaultResources {
 
     @NotNull
     public static List<Pair<String, Pack.ResourcesSupplier>> getPackResources(PackType type) {
-        List<Pair<String,Pack.ResourcesSupplier>> packs = new ArrayList<>();
+        List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
             for (var file : files.toList()) {
                 if (Files.isDirectory(file)) {
                     Pack.ResourcesSupplier packResources = s -> new AutoMetadataFolderPackResources(s, type, file);
-                    packs.add(new Pair<>(file.getFileName().toString(),packResources));
+                    packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 } else if (file.getFileName().toString().endsWith(".zip")) {
                     Pack.ResourcesSupplier packResources = s -> new AutoMetadataFilePackResources(s, type, file.toFile());
-                    packs.add(new Pair<>(file.getFileName().toString(),packResources));
+                    packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 }
             }
         } catch (IOException ignored) {

@@ -26,6 +26,7 @@ public interface ResourceProvider {
 
     /**
      * Use this to get an instance of a ResourceProvider to get resources from.
+     *
      * @return A ResourceProvider grouping resources from mod jars and the `globalresources` directory.
      */
     @SuppressWarnings("UnusedReturnValue")
@@ -40,9 +41,10 @@ public interface ResourceProvider {
 
     /**
      * Gets a collection of ResourceLocations present matching a certain pattern.
-     * @param packType An identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
-     *                 datapacks.
-     * @param prefix The initial part of the ResourceLocation path to search in.
+     *
+     * @param packType  An identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
+     *                  datapacks.
+     * @param prefix    The initial part of the ResourceLocation path to search in.
      * @param predicate A predicate to filter results.
      * @return A collection of located ResourceLocations, excluding the pack type.
      */
@@ -51,6 +53,7 @@ public interface ResourceProvider {
 
     /**
      * Gets a stream of InputStreams matching a single ResourceLocation.
+     *
      * @param packType An identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
      *                 datapacks.
      * @param location The ResourceLocation, excluding pack type, of the resources to locate.

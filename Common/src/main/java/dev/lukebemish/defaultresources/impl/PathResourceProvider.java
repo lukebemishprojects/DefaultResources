@@ -40,18 +40,18 @@ public class PathResourceProvider implements ResourceProvider {
                     Path newRoot = prefix == null ? file : file.resolve(prefix);
                     try (var walk = Files.walk(newRoot)) {
                         return walk
-                                .filter(p -> !Files.isDirectory(p))
-                                .map(root::relativize)
-                                .map(path -> {
-                                    String namespace = path.getName(0).toString();
-                                    List<String> rlPath = new ArrayList<>();
-                                    for (int i = 1; i < path.getNameCount(); i++) {
-                                        rlPath.add(path.getName(i).toString());
-                                    }
-                                    return new ResourceLocation(namespace, String.join("/", rlPath));
-                                })
-                                .filter(predicate)
-                                .collect(Collectors.toList());
+                            .filter(p -> !Files.isDirectory(p))
+                            .map(root::relativize)
+                            .map(path -> {
+                                String namespace = path.getName(0).toString();
+                                List<String> rlPath = new ArrayList<>();
+                                for (int i = 1; i < path.getNameCount(); i++) {
+                                    rlPath.add(path.getName(i).toString());
+                                }
+                                return new ResourceLocation(namespace, String.join("/", rlPath));
+                            })
+                            .filter(predicate)
+                            .collect(Collectors.toList());
                     } catch (IOException e) {
                         return List.<ResourceLocation>of();
                     }
@@ -75,7 +75,7 @@ public class PathResourceProvider implements ResourceProvider {
 
     protected Path resolve(String... paths) throws IOException {
         Path path = this.source.toAbsolutePath();
-        for(String name : paths)
+        for (String name : paths)
             path = path.resolve(name);
         return path;
     }

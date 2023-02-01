@@ -27,7 +27,7 @@ ModsDotGroovy.make {
         }
 
         dependencies {
-            onForge{
+            onForge {
                 forge = ">=${this.forgeVersion}"
             }
             minecraft = this.minecraftVersionRange

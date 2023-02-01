@@ -15,6 +15,7 @@ public interface IPlatform {
     Path getGlobalFolder();
 
     void extractResources();
+
     Collection<ResourceProvider> getJarProviders();
 
     Path getConfigDir();

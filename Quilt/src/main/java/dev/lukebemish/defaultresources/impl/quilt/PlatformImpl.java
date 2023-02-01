@@ -7,11 +7,11 @@ package dev.lukebemish.defaultresources.impl.quilt;
 
 import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
+import dev.lukebemish.defaultresources.api.ResourceProvider;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.PathResourceProvider;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.IPlatform;
-import dev.lukebemish.defaultresources.api.ResourceProvider;
 import org.quiltmc.loader.api.QuiltLoader;
 
 import java.io.IOException;
@@ -65,10 +65,10 @@ public class PlatformImpl implements IPlatform {
     @Override
     public Map<String, Path> getExistingModdedPaths(String relative) {
         return QuiltLoader.getAllMods().stream()
-                .filter(mod->!mod.metadata().id().equals("minecraft"))
-                .map(mod->
-                        new Pair<>(mod.metadata().id(), mod.rootPath().toAbsolutePath().resolve(relative)))
-                .filter(it->it.getSecond()!=null&&Files.exists(it.getSecond()))
-                .collect(Collectors.toMap(Pair::getFirst,Pair::getSecond,(a, b)->a));
+            .filter(mod -> !mod.metadata().id().equals("minecraft"))
+            .map(mod ->
+                new Pair<>(mod.metadata().id(), mod.rootPath().toAbsolutePath().resolve(relative)))
+            .filter(it -> it.getSecond() != null && Files.exists(it.getSecond()))
+            .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (a, b) -> a));
     }
 }

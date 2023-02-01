@@ -34,7 +34,7 @@ public class ZipResourceProvider extends PathResourceProvider {
     @Override
     protected Path resolve(String... paths) throws IOException {
         Path path = getZipFile().getPath("/");
-        for(String name : paths)
+        for (String name : paths)
             path = path.resolve(name);
         return path;
     }

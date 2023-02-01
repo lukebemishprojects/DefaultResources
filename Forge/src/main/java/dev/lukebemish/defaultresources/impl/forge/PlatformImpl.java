@@ -7,11 +7,11 @@ package dev.lukebemish.defaultresources.impl.forge;
 
 import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
+import dev.lukebemish.defaultresources.api.ResourceProvider;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.PathResourceProvider;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.IPlatform;
-import dev.lukebemish.defaultresources.api.ResourceProvider;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -39,19 +39,19 @@ public class PlatformImpl implements IPlatform {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
-        FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f->f.getMods().stream())
-                .filter(mod->!(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
-                .forEach(mod->
-                        DefaultResources.forMod(FMLPaths.CONFIGDIR.get(), mod.getOwningFile().getFile()::findResource, mod.getModId()));
+        FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
+            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
+            .forEach(mod ->
+                DefaultResources.forMod(FMLPaths.CONFIGDIR.get(), mod.getOwningFile().getFile()::findResource, mod.getModId()));
     }
 
     @Override
     public Collection<ResourceProvider> getJarProviders() {
         List<ResourceProvider> providers = new ArrayList<>();
-        FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f->f.getMods().stream())
-                .filter(mod->!(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
-                .forEach(mod->
-                        providers.add(new PathResourceProvider(mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/")))));
+        FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
+            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
+            .forEach(mod ->
+                providers.add(new PathResourceProvider(mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/")))));
         return providers;
     }
 
@@ -62,11 +62,11 @@ public class PlatformImpl implements IPlatform {
 
     @Override
     public Map<String, Path> getExistingModdedPaths(String relative) {
-        return FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f->f.getMods().stream())
-                .filter(mod->!(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
-                .map(mod->
-                        new Pair<>(mod.getModId(), mod.getOwningFile().getFile().findResource(relative)))
-                .filter(it->it.getSecond()!=null&&Files.exists(it.getSecond()))
-                .collect(Collectors.toMap(Pair::getFirst,Pair::getSecond,(a,b)->a));
+        return FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
+            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
+            .map(mod ->
+                new Pair<>(mod.getModId(), mod.getOwningFile().getFile().findResource(relative)))
+            .filter(it -> it.getSecond() != null && Files.exists(it.getSecond()))
+            .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (a, b) -> a));
     }
 }

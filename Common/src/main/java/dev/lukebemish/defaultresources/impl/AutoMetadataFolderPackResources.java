@@ -26,7 +26,7 @@ public class AutoMetadataFolderPackResources extends PathPackResources {
     @Nullable
     @Override
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
-        if(serializer.getMetadataSectionName().equals("pack")) {
+        if (serializer.getMetadataSectionName().equals("pack")) {
             JsonObject object = new JsonObject();
             object.addProperty("pack_format", this.packType.getVersion(SharedConstants.getCurrentVersion()));
             object.addProperty("description", "Global resources");

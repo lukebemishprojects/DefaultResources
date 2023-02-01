@@ -25,8 +25,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 public record Config(HashMap<String, ExtractionState> extract) {
-    public static final Codec<Config> CODEC = RecordCodecBuilder.create(i->i.group(
-            Codec.unboundedMap(Codec.STRING, StringRepresentable.fromEnum(ExtractionState::values)).xmap(HashMap::new, Function.identity()).fieldOf("extract").forGetter(Config::extract)
+    public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
+        Codec.unboundedMap(Codec.STRING, StringRepresentable.fromEnum(ExtractionState::values)).xmap(HashMap::new, Function.identity()).fieldOf("extract").forGetter(Config::extract)
     ).apply(i, Config::new));
 
     public static final Supplier<Config> INSTANCE = Suppliers.memoize(Config::readFromConfig);
@@ -42,11 +42,11 @@ public record Config(HashMap<String, ExtractionState> extract) {
             try {
                 JsonElement json = DefaultResources.GSON.fromJson(Files.newBufferedReader(configPath), JsonElement.class);
                 config = CODEC.parse(JsonOps.INSTANCE, json).getOrThrow(false, e ->
-                        DefaultResources.LOGGER.error("Error parsing {}.json config; using (and replacing) with default: {}",DefaultResources.MOD_ID,e));
+                    DefaultResources.LOGGER.error("Error parsing {}.json config; using (and replacing) with default: {}", DefaultResources.MOD_ID, e));
             } catch (IOException e) {
-                DefaultResources.LOGGER.error("Could not read {}.json config; using (and replacing) with default.",DefaultResources.MOD_ID,e);
+                DefaultResources.LOGGER.error("Could not read {}.json config; using (and replacing) with default.", DefaultResources.MOD_ID, e);
             } catch (JsonSyntaxException e) {
-                DefaultResources.LOGGER.error("Error parsing {}.json config; using (and replacing) with default.",DefaultResources.MOD_ID,e);
+                DefaultResources.LOGGER.error("Error parsing {}.json config; using (and replacing) with default.", DefaultResources.MOD_ID, e);
             } catch (RuntimeException ignored) {
                 // Already caught and logged.
             }
@@ -55,13 +55,14 @@ public record Config(HashMap<String, ExtractionState> extract) {
         Services.PLATFORM.getExistingModdedPaths(DefaultResources.META_FILE_PATH).forEach((modId, metaPath) -> {
             try (var is = Files.newInputStream(metaPath)) {
                 JsonElement object = DefaultResources.GSON.fromJson(new InputStreamReader(is), JsonElement.class);
-                ModMetaFile metaFile = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, object).getOrThrow(false, e -> {});
+                ModMetaFile metaFile = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, object).getOrThrow(false, e -> {
+                });
                 if (!map.containsKey(modId)) {
-                    map.put(modId, metaFile.extractsByDefault()?ExtractionState.EXTRACT:ExtractionState.UNEXTRACTED);
+                    map.put(modId, metaFile.extractsByDefault() ? ExtractionState.EXTRACT : ExtractionState.UNEXTRACTED);
                 }
             } catch (IOException | RuntimeException e) {
                 DefaultResources.LOGGER.warn("We thought there was a readable {} for mod {}, but we got an error when reading it!",
-                        DefaultResources.META_FILE_PATH,modId,e);
+                    DefaultResources.META_FILE_PATH, modId, e);
             }
         });
         config = new Config(map);
@@ -69,7 +70,7 @@ public record Config(HashMap<String, ExtractionState> extract) {
         try {
             writeConfig(configPath, config);
         } catch (IOException e) {
-            DefaultResources.LOGGER.error("Could not write {}.json config. There may be odd behavior. ",DefaultResources.MOD_ID,e);
+            DefaultResources.LOGGER.error("Could not write {}.json config. There may be odd behavior. ", DefaultResources.MOD_ID, e);
         }
 
         return config;
@@ -82,8 +83,9 @@ public record Config(HashMap<String, ExtractionState> extract) {
         try (var writer = Files.newBufferedWriter(path)) {
             writer.write("// Set extraction to \"extract\" to extract currently unextracted resources.\n");
             DefaultResources.GSON.toJson(CODEC.encodeStart(JsonOps.INSTANCE, config)
-                    .getOrThrow(false, e -> {}),
-                    writer);
+                    .getOrThrow(false, e -> {
+                    }),
+                writer);
         }
     }
 
@@ -92,7 +94,7 @@ public record Config(HashMap<String, ExtractionState> extract) {
         try {
             writeConfig(configPath, this);
         } catch (IOException e) {
-            DefaultResources.LOGGER.error("Could not save {} config!",DefaultResources.MOD_ID,e);
+            DefaultResources.LOGGER.error("Could not save {} config!", DefaultResources.MOD_ID, e);
         }
     }
 
@@ -103,6 +105,7 @@ public record Config(HashMap<String, ExtractionState> extract) {
 
         public final boolean extractIfMissing;
         public final boolean extractRegardless;
+
         ExtractionState(boolean extractIfMissing, boolean extractRegardless) {
             this.extractIfMissing = extractIfMissing;
             this.extractRegardless = extractRegardless;

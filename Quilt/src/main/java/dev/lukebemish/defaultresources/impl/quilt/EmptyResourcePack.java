@@ -41,6 +41,7 @@ public class EmptyResourcePack extends AbstractPackResources {
     public void listResources(@NotNull PackType packType, @NotNull String string, @NotNull String string2, @NotNull ResourceOutput resourceOutput) {
 
     }
+
     @Override
     public @NotNull Set<String> getNamespaces(@NotNull PackType type) {
         return Set.of();
@@ -50,8 +51,7 @@ public class EmptyResourcePack extends AbstractPackResources {
     @Override
     @SuppressWarnings("unchecked")
     public <T> T getMetadataSection(MetadataSectionSerializer<T> deserializer) {
-        if (deserializer.getMetadataSectionName().equals("pack"))
-        {
+        if (deserializer.getMetadataSectionName().equals("pack")) {
             return (T) metadata;
         }
         return null;
