@@ -31,4 +31,9 @@ public class GroupedResourceProvider implements ResourceProvider {
     public @NotNull Stream<? extends InputStream> getResourceStreams(String packType, ResourceLocation location) {
         return deferrals.stream().flatMap(p -> p.getResourceStreams(packType, location));
     }
+
+    @Override
+    public @NotNull Stream<? extends InputStream> getResourceStreams(String packType, Collection<ResourceLocation> locations) {
+        return deferrals.stream().flatMap(p -> p.getResourceStreams(packType, locations));
+    }
 }

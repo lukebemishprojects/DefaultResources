@@ -52,13 +52,24 @@ public interface ResourceProvider {
     Collection<ResourceLocation> getResources(String packType, String prefix, Predicate<ResourceLocation> predicate);
 
     /**
-     * Gets a stream of InputStreams matching a single ResourceLocation.
+     * Gets a stream of InputStreams matching a single location.
      *
-     * @param packType An identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
-     *                 datapacks.
-     * @param location The ResourceLocation, excluding pack type, of the resources to locate.
-     * @return A stream of the located resources. Should be closed once no longer in use.
+     * @param packType an identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
+     *                 datapacks
+     * @param location the resource location, excluding pack type, of the resources to locate
+     * @return a stream of the located resources. Should be closed once no longer in use
      */
     @NotNull
     Stream<? extends InputStream> getResourceStreams(String packType, ResourceLocation location);
+
+    /**
+     * Gets a stream of InputStreams matching any of a collections of locations.
+     *
+     * @param packType an identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
+     *                 datapacks
+     * @param locations the resource locations, excluding pack type, of the resources to locate
+     * @return a stream of the located resources. Should be closed once no longer in use
+     */
+    @NotNull
+    Stream<? extends InputStream> getResourceStreams(String packType, Collection<ResourceLocation> locations);
 }

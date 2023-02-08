@@ -73,6 +73,11 @@ public class PathResourceProvider implements ResourceProvider {
         }
     }
 
+    @Override
+    public @NotNull Stream<? extends InputStream> getResourceStreams(String packType, Collection<ResourceLocation> locations) {
+        return locations.stream().flatMap(rl -> getResourceStreams(packType, rl));
+    }
+
     protected Path resolve(String... paths) throws IOException {
         Path path = this.source.toAbsolutePath();
         for (String name : paths)
