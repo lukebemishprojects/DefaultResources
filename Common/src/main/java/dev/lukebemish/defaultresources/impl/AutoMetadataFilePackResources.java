@@ -28,7 +28,7 @@ public class AutoMetadataFilePackResources extends FilePackResources {
     public <T> T getMetadataSection(MetadataSectionSerializer<T> serializer) {
         if (serializer.getMetadataSectionName().equals("pack")) {
             JsonObject object = new JsonObject();
-            object.addProperty("pack_format", this.packType.getVersion(SharedConstants.getCurrentVersion()));
+            object.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion(this.packType));
             object.addProperty("description", "Global resources");
             return serializer.fromJson(object);
         }

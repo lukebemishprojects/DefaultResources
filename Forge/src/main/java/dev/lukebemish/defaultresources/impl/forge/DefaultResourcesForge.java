@@ -46,8 +46,8 @@ public class DefaultResourcesForge {
                 List<Pair<String, Pack.ResourcesSupplier>> packs = DefaultResources.getPackResources(event.getPackType());
                 if (event.getPackType() == PackType.CLIENT_RESOURCES) {
                     Pack.Info info = new Pack.Info(Component.literal("Global Resources"),
-                        PackType.SERVER_DATA.getVersion(SharedConstants.getCurrentVersion()),
-                        PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()),
+                        SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA),
+                        SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
                         FeatureFlagSet.of(),
                         true);
                     Pack pack = Pack.create(DefaultResources.MOD_ID, Component.literal("Global Resources"), true, s -> new DelegatingPackResources(
@@ -55,7 +55,7 @@ public class DefaultResourcesForge {
                             false,
                             new PackMetadataSection(
                                 Component.literal("Global Resources"),
-                                event.getPackType().getVersion(SharedConstants.getCurrentVersion())),
+                                SharedConstants.getCurrentVersion().getPackVersion(event.getPackType())),
                             packs.stream().map(p -> p.getSecond().open(s)).toList()),
                         info,
                         PackType.CLIENT_RESOURCES, Pack.Position.TOP, true, PackSource.DEFAULT);
@@ -63,8 +63,8 @@ public class DefaultResourcesForge {
                 } else {
                     packs.forEach(packResources -> {
                         Pack.Info info = new Pack.Info(Component.literal("Global Resources"),
-                            PackType.SERVER_DATA.getVersion(SharedConstants.getCurrentVersion()),
-                            PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()),
+                            SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA),
+                            SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
                             FeatureFlagSet.of(),
                             true);
 
