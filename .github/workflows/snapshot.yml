@@ -16,6 +16,11 @@ jobs:
               with:
                   distribution: "temurin"
                   java-version: 17
+            - name: Submit Dependencies
+              uses: mikepenz/gradle-dependency-submission@v0.8.6
+              with:
+                  sub-module-mode: COMBINED
+                  include-build-environment: true
             - uses: gradle/gradle-build-action@v2
               with:
                   arguments: checkLicenses build
@@ -28,9 +33,4 @@ jobs:
                   MAVEN_USER: github
                   MAVEN_PASSWORD: ${{ secrets.SNAPSHOT_MAVEN_PASSWORD }}
                   SNAPSHOT_MAVEN_URL: https://maven.lukebemish.dev/snapshots/
-            - name: Submit Dependencies
-              uses: mikepenz/gradle-dependency-submission@v0.8.6
-              with:
-                  sub-module-mode: COMBINED
-                  include-build-environment: true
 
