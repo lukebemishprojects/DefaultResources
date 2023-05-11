@@ -4,7 +4,7 @@ plugins {
 
 apply plugin: 'org.quiltmc.loom'
 
-archivesBaseName = "${mod_id}-quilt-${minecraft_version}"
+archivesBaseName = "${mod_id}-quilt-${libs.versions.minecraft.get()}"
 
 repositories {
 
@@ -28,20 +28,19 @@ configurations {
 }
 
 dependencies {
-
-    minecraft "com.mojang:minecraft:${minecraft_version}"
+    minecraft libs.minecraft
     mappings loom.layered() {
         officialMojangMappings()
-        parchment("org.parchmentmc.data:parchment-${parchment_minecraft_version}:${parchment_version}@zip")
+        parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.minecraft.get()}:${libs.versions.parchment.mappings.get()}@zip")
     }
-    modImplementation "org.quiltmc:quilt-loader:${quilt_loader_version}"
+    modImplementation libs.quilt.loader
 
-    modImplementation("org.quiltmc:qsl:${quilt_stdlib_version}+${minecraft_version}")
+    modImplementation libs.qsl
 
     implementation project(":Common")
 
-    compileOnly group: 'com.google.auto.service', name: 'auto-service', version: '1.0.1'
-    annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: '1.0.1'
+    compileOnly libs.autoservice
+    annotationProcessor libs.autoservice
 }
 
 loom {

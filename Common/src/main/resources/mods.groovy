@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022 Luke Bemish and contributors
+ * Copyright (C) 2023 Luke Bemish, and contributors
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
@@ -33,7 +33,7 @@ ModsDotGroovy.make {
             minecraft = this.minecraftVersionRange
             onQuilt {
                 quiltLoader = ">=${this.quiltLoaderVersion}"
-                quilt_base = ">=${this.buildProperties.quilt_stdlib_version}"
+                quilt_base = ">=${this.libs.versions.qsl}"
             }
         }
     }

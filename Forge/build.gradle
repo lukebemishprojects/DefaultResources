@@ -1,27 +1,17 @@
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
-        mavenCentral()
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.parchmentmc:librarian:1.+'
-        classpath 'org.spongepowered:mixingradle:0.7.+'
-    }
+plugins {
+    alias libs.plugins.forgegradle
+    alias libs.plugins.librarian
+    alias libs.plugins.mixingradle
 }
 
 apply plugin: 'java'
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
-apply plugin: 'org.spongepowered.mixin'
 
-archivesBaseName = "${mod_id}-forge-${minecraft_version}"
+archivesBaseName = "${mod_id}-forge-${libs.versions.minecraft.get()}"
 
 minecraft {
-    mappings channel: 'parchment', version: "${parchment_minecraft_version}-${parchment_version}-${minecraft_version}"
+    mappings channel: 'parchment', version: "${libs.versions.parchment.minecraft.get()}-${libs.versions.parchment.mappings.get()}-${libs.versions.minecraft.get()}"
 
     if (project.hasProperty('forge_ats_enabled') && project.findProperty('forge_ats_enabled').toBoolean()) {
         // This location is hardcoded in Forge and can not be changed.
@@ -83,13 +73,13 @@ configurations {
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    minecraft libs.forge
     compileOnly project(":Common")
 
-    compileOnly group: 'com.google.auto.service', name: 'auto-service', version: '1.0.1'
-    annotationProcessor group: 'com.google.auto.service', name: 'auto-service', version: '1.0.1'
+    compileOnly libs.autoservice
+    annotationProcessor libs.autoservice
 
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
+    annotationProcessor "org.spongepowered:mixin:${libs.versions.mixin.get()}:processor"
 }
 
 mixin {
