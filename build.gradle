@@ -33,6 +33,10 @@ if (System.getenv('SNAPSHOT_MAVEN_URL')) {
     version += '-SNAPSHOT'
 }
 
+subprojects {
+    version = rootProject.version
+}
+
 static def getGitCommit() {
     def proc = 'git rev-parse --short HEAD'.execute()
     proc.waitFor()
