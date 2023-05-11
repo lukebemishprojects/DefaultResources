@@ -34,6 +34,15 @@ updates:
       - forge
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "*modsdotgroovy*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.mojang:minecraft"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "*minecraftforge*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "org.quiltmc*"
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
