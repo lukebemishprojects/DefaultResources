@@ -20,7 +20,7 @@ forgegradle = "5.1.73"
 librarian = "1.2.0"
 mixingradle = "0.7.33"
 
-jetbrains_annotations = "23.0.0"
+jetbrains_annotations = "24.0.1"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
