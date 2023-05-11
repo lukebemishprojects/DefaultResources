@@ -23,9 +23,9 @@ jobs:
                   arguments: publish
                   cache-read-only: ${{ !startsWith(github.ref, 'refs/heads/1.') }}
               env:
-                  MAVEN_USER: ${{ secrets.RELEASE_MAVEN_USER }}
+                  MAVEN_USER: github
                   MAVEN_PASSWORD: ${{ secrets.RELEASE_MAVEN_PASSWORD }}
-                  MAVEN_URL: ${{ secrets.RELEASE_MAVEN_URL }}
+                  MAVEN_URL: https://maven.lukebemish.dev/releases/
             - uses: gradle/gradle-build-action@v2
               with:
                   arguments: tagRelease

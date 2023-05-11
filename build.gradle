@@ -8,7 +8,7 @@ version = new Properties().tap {
     load(new FileInputStream(file('version.properties')))
 }.get('version')
 
-String lastTaggedVersion
+String lastTaggedVersion = version
 def gitTagProcess = 'git describe --abbrev=0 --tags'.execute()
 gitTagProcess.waitFor()
 if (gitTagProcess.exitValue() == 0) {
@@ -16,20 +16,26 @@ if (gitTagProcess.exitValue() == 0) {
     def parts = lastTaggedVersion.split("-")
     lastTaggedVersion = parts[0..-2].join("-")
 } else {
-    throw new GradleException('Failed to get last tagged version')
+    logger.warn "Failed to get last tagged version: ERROR(${gitTagProcess.exitValue()})"
 }
 
 if (lastTaggedVersion == version) {
-    def noMetaParts = version.split("-")
-    def noBuildParts = noMetaParts[0].split("\\+")
-    def mainParts = noBuildParts[0].split("\\.")
-    mainParts[-1] = (mainParts[-1] as int + 1) as String
-    noBuildParts[0] = mainParts.join(".")
-    noMetaParts[0] = noBuildParts.join("+")
-    version = noMetaParts.join("-")
+    def currentTagProcess = 'git tag --points-at HEAD'.execute()
+    currentTagProcess.waitFor()
+    if (currentTagProcess.exitValue() != 0 || currentTagProcess.text.trim().empty) {
+        def noMetaParts = version.split("-")
+        def noBuildParts = noMetaParts[0].split("\\+")
+        def mainParts = noBuildParts[0].split("\\.")
+        mainParts[-1] = (mainParts[-1] as int + 1) as String
+        noBuildParts[0] = mainParts.join(".")
+        noMetaParts[0] = noBuildParts.join("+")
+        version = noMetaParts.join("-")
+    }
 }
 
-if (System.getenv('SNAPSHOT_MAVEN_URL')) {
+if (System.getenv('PR_NUMBER')) {
+    version += "-pr${System.getenv('PR_NUMBER')}"
+} else if (System.getenv('SNAPSHOT_MAVEN_URL')) {
     version += '-SNAPSHOT'
 }
 
@@ -160,12 +166,19 @@ subprojects { p ->
 
     publishing {
         repositories {
-            maven {
-                name = 'PersonalMaven'
-                url = uri(System.getenv('SNAPSHOT_MAVEN_URL') ?: System.getenv('MAVEN_URL') ?: 'https://maven.lukebemish.dev/releases')
-                credentials {
-                    username = System.getenv('MAVEN_USER') ?: findProperty('lukebemishMavenUser') ?: ''
-                    password = System.getenv('MAVEN_PASSWORD') ?: findProperty('lukebemishMavenPassword') ?: ''
+            if (System.getenv('PR_NUMBER')) {
+                maven {
+                    name = 'LocalMaven'
+                    url = layout.buildDirectory.dir('repo')
+                }
+            } else {
+                maven {
+                    name = 'PersonalMaven'
+                    url = uri(System.getenv('SNAPSHOT_MAVEN_URL') ?: System.getenv('MAVEN_URL') ?: 'https://maven.lukebemish.dev/releases')
+                    credentials {
+                        username = System.getenv('MAVEN_USER') ?: findProperty('lukebemishMavenUser') ?: ''
+                        password = System.getenv('MAVEN_PASSWORD') ?: findProperty('lukebemishMavenPassword') ?: ''
+                    }
                 }
             }
         }
