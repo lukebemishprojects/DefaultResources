@@ -41,5 +41,5 @@ jobs:
                     MAVEN_USER: github
                     MAVEN_PASSWORD: ${{ secrets.PR_MAVEN_PASSWORD }}
                     MAVEN_URL: "https://maven.lukebemish.dev/pullrequests/"
-                    ALLOWED_VERSIONS: ${{ context.payload.workflow_run.pull_requests.*.number }}
+                    ALLOWED_VERSIONS: ${{ payload.workflow_run.pull_requests.*.number }}
                     ALLOWED_PATHS: "dev/lukebemish/defaultresources/defaultresources-*"
