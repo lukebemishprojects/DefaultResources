@@ -169,7 +169,7 @@ subprojects { p ->
             if (System.getenv('PR_NUMBER')) {
                 maven {
                     name = 'LocalMaven'
-                    url = layout.buildDirectory.dir('repo')
+                    url = rootProject.layout.buildDirectory.dir('repo')
                 }
             } else {
                 maven {
