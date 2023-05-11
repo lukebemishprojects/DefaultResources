@@ -7,16 +7,22 @@ on:
 jobs:
     publish:
         runs-on: ubuntu-latest
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}
+        if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion == 'success' }}
         steps:
             - uses: actions/checkout@v3
               with:
-                  name: lukebemish/artifact-sync
+                  repository: lukebemish/artifact-sync
                   ref: refs/heads/main
+            - run: mkdir repo
             - name: 'Download artifact'
               uses: actions/github-script@v6
               with:
                   script: |
+                      const pull_requests = ${{ toJSON(github.event.workflow_run.pull_requests) }};
+                      if (!pull_requests.length) {
+                        return core.error("This workflow doesn't match any pull requests!");
+                      }
+
                       let allArtifacts = await github.rest.actions.listWorkflowRunArtifacts({
                          owner: context.repo.owner,
                          repo: context.repo.repo,
@@ -34,12 +40,12 @@ jobs:
                       let fs = require('fs');
                       fs.writeFileSync(`${process.env.GITHUB_WORKSPACE}/repo.zip`, Buffer.from(download.data));
             - name: 'Unzip artifacts'
-              run: unzip repo.zip
+              run: unzip repo.zip -d repo
             - name: 'Publish artifacts'
               run: python3 run.py
               env:
                     MAVEN_USER: github
                     MAVEN_PASSWORD: ${{ secrets.PR_MAVEN_PASSWORD }}
                     MAVEN_URL: "https://maven.lukebemish.dev/pullrequests/"
-                    ALLOWED_VERSIONS: ${{ github.event.workflow_run.pull_requests.*.number }}
+                    ALLOWED_VERSIONS: ${{ github.event.workflow_run.pull_requests.0.number }}
                     ALLOWED_PATHS: "dev/lukebemish/defaultresources/defaultresources-*"
