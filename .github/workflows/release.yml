@@ -16,6 +16,10 @@ jobs:
                   java-version: 17
             - uses: gradle/gradle-build-action@v2
               with:
+                  arguments: tagRelease
+                  cache-read-only: ${{ !startsWith(github.ref, 'refs/heads/1.') }}
+            - uses: gradle/gradle-build-action@v2
+              with:
                   arguments: checkLicenses build
                   cache-read-only: ${{ !startsWith(github.ref, 'refs/heads/1.') }}
             - uses: gradle/gradle-build-action@v2
@@ -26,10 +30,6 @@ jobs:
                   MAVEN_USER: github
                   MAVEN_PASSWORD: ${{ secrets.RELEASE_MAVEN_PASSWORD }}
                   MAVEN_URL: https://maven.lukebemish.dev/releases/
-            - uses: gradle/gradle-build-action@v2
-              with:
-                  arguments: tagRelease
-                  cache-read-only: ${{ !startsWith(github.ref, 'refs/heads/1.') }}
             - run: |
                   git push
                   git push --tags
