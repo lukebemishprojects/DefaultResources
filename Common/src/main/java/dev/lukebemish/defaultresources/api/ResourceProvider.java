@@ -8,13 +8,21 @@ package dev.lukebemish.defaultresources.api;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+/**
+ * The main API entrypoint for DefaultResources.
+ */
 public interface ResourceProvider {
     /**
      * This should be run before your config file is written too, to ensure that DefaultResources takes it into account
@@ -37,6 +45,25 @@ public interface ResourceProvider {
             DefaultResources.RESOURCE_PROVIDER = DefaultResources.assembleResourceProvider();
         }
         return DefaultResources.RESOURCE_PROVIDER;
+    }
+
+    /**
+     * Gets the highest priority resource matching a given location
+     *
+     * @param packType an identifier for the pack type folder - for instance, vanilla uses the `data` pack type for
+     *                 datapacks
+     * @param location the resource location, excluding pack type, of the resources to locate
+     * @return An {@link IoSupplier} of the located resource. Should be closed once no longer in use
+     */
+    @NotNull
+    default IoSupplier<InputStream> getResource(String packType, ResourceLocation location) {
+        var optional = getResourceStreams(packType, location).findFirst();
+        if (optional.isEmpty()) {
+            return () -> {
+                throw new IOException("No resource found at " + location);
+            };
+        }
+        return optional::get;
     }
 
     /**

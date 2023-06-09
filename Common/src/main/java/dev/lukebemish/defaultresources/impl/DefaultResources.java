@@ -10,7 +10,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-import dev.lukebemish.defaultresources.api.ModMetaFile;
 import dev.lukebemish.defaultresources.api.ResourceProvider;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
@@ -79,7 +78,7 @@ public class DefaultResources {
                             if (!Files.exists(defaultResources.resolve(type.getDirectory()))) return null;
                             return () -> new AutoMetadataFolderPackResources(s, type, defaultResources);
                         });
-                    } else if ((!Files.exists(configDir.resolve(meta.configPath())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
+                    } else if ((meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
                         Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
                         if (!meta.zip()) {
                             Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modId);
@@ -93,19 +92,19 @@ public class DefaultResources {
                                 copyResources(defaultResources, outPath);
                             }
                         }
-                        if (meta.createsMarker() && !Files.exists(configDir.resolve(meta.configPath()))) {
+                        if (meta.createsMarker() && meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get()))) {
                             try {
-                                Path markerPath = configDir.resolve(meta.configPath());
+                                Path markerPath = configDir.resolve(meta.markerPath().get());
                                 String comment;
-                                if (meta.configPath().endsWith(".json5") || meta.configPath().endsWith(".json"))
+                                if (meta.markerPath().get().endsWith(".json5") || meta.markerPath().get().endsWith(".json"))
                                     comment = "// ";
-                                else if (meta.configPath().endsWith(".toml"))
+                                else if (meta.markerPath().get().endsWith(".toml"))
                                     comment = "# ";
                                 else
                                     comment = "";
                                 Files.writeString(markerPath, comment + "This is a marker file created by " + modId + ". If the mod is marked as already extracted, default resources will not be re-extracted while this file exists.\n");
                             } catch (IOException e) {
-                                LOGGER.error("Issues writing marker file at {} for mod {}: ", meta.configPath(), modId, e);
+                                LOGGER.error("Issues writing marker file at {} for mod {}: ", meta.markerPath(), modId, e);
                             }
                         }
                     }

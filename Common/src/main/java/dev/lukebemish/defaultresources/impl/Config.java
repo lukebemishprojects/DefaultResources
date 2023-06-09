@@ -11,7 +11,6 @@ import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.lukebemish.defaultresources.api.ModMetaFile;
 import net.minecraft.util.StringRepresentable;
 import org.jetbrains.annotations.NotNull;
 
