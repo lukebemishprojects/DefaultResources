@@ -7,11 +7,12 @@ package dev.lukebemish.defaultresources.impl.quilt;
 
 import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
-import dev.lukebemish.defaultresources.api.ResourceProvider;
+import dev.lukebemish.defaultresources.impl.AutoMetadataPathPackResources;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
-import dev.lukebemish.defaultresources.impl.PathResourceProvider;
 import dev.lukebemish.defaultresources.impl.Services;
-import dev.lukebemish.defaultresources.impl.services.IPlatform;
+import dev.lukebemish.defaultresources.impl.services.Platform;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import org.quiltmc.loader.api.QuiltLoader;
 
 import java.io.IOException;
@@ -23,8 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@AutoService(IPlatform.class)
-public class PlatformImpl implements IPlatform {
+@AutoService(Platform.class)
+public class PlatformImpl implements Platform {
     public Path getGlobalFolder() {
         return QuiltLoader.getGameDir().resolve("globalresources");
     }
@@ -46,12 +47,13 @@ public class PlatformImpl implements IPlatform {
     }
 
     @Override
-    public Collection<ResourceProvider> getJarProviders() {
-        List<ResourceProvider> providers = new ArrayList<>();
+    public Collection<Pair<String, Pack.ResourcesSupplier>> getJarProviders(PackType type) {
+        List<Pair<String, Pack.ResourcesSupplier>> providers = new ArrayList<>();
         QuiltLoader.getAllMods().forEach(mod -> {
             String modid = mod.metadata().id();
             if (!modid.equals("minecraft")) {
-                providers.add(new PathResourceProvider(mod.rootPath()));
+                Path packPath = mod.rootPath().resolve("static");
+                providers.add(new Pair<>(modid, s -> new AutoMetadataPathPackResources(s, type, packPath)));
             }
         });
         return providers;

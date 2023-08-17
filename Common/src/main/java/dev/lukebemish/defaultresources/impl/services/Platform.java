@@ -5,18 +5,20 @@
 
 package dev.lukebemish.defaultresources.impl.services;
 
-import dev.lukebemish.defaultresources.api.ResourceProvider;
+import com.mojang.datafixers.util.Pair;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Map;
 
-public interface IPlatform {
+public interface Platform {
     Path getGlobalFolder();
 
     void extractResources();
 
-    Collection<ResourceProvider> getJarProviders();
+    Collection<Pair<String, Pack.ResourcesSupplier>> getJarProviders(PackType type);
 
     Path getConfigDir();
 

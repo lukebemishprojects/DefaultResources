@@ -7,7 +7,6 @@ package dev.lukebemish.defaultresources.impl;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import dev.lukebemish.defaultresources.api.ResourceProvider;
 
 import java.util.Optional;
 

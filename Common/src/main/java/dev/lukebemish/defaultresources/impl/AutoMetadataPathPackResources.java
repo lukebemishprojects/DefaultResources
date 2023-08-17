@@ -7,19 +7,19 @@ package dev.lukebemish.defaultresources.impl;
 
 import com.google.gson.JsonObject;
 import net.minecraft.SharedConstants;
-import net.minecraft.server.packs.FilePackResources;
 import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
+import java.nio.file.Path;
 
-public class AutoMetadataFilePackResources extends FilePackResources {
+public class AutoMetadataPathPackResources extends PathPackResources {
 
     private final PackType packType;
 
-    public AutoMetadataFilePackResources(String s, PackType packType, File file) {
-        super(s, file, false);
+    public AutoMetadataPathPackResources(String s, PackType packType, Path path) {
+        super(s, path, false);
         this.packType = packType;
     }
 

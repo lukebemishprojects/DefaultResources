@@ -5,12 +5,12 @@
 
 package dev.lukebemish.defaultresources.impl;
 
-import dev.lukebemish.defaultresources.impl.services.IPlatform;
+import dev.lukebemish.defaultresources.impl.services.Platform;
 
 import java.util.ServiceLoader;
 
 public class Services {
-    public static final IPlatform PLATFORM = load(IPlatform.class);
+    public static final Platform PLATFORM = load(Platform.class);
 
     public static <T> T load(Class<T> clazz) {
 

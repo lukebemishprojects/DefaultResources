@@ -7,11 +7,12 @@ package dev.lukebemish.defaultresources.impl.forge;
 
 import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
-import dev.lukebemish.defaultresources.api.ResourceProvider;
+import dev.lukebemish.defaultresources.impl.AutoMetadataPathPackResources;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
-import dev.lukebemish.defaultresources.impl.PathResourceProvider;
 import dev.lukebemish.defaultresources.impl.Services;
-import dev.lukebemish.defaultresources.impl.services.IPlatform;
+import dev.lukebemish.defaultresources.impl.services.Platform;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -24,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@AutoService(IPlatform.class)
-public class PlatformImpl implements IPlatform {
+@AutoService(Platform.class)
+public class PlatformImpl implements Platform {
 
     public Path getGlobalFolder() {
         return FMLPaths.GAMEDIR.get().resolve("globalresources");
@@ -46,12 +47,14 @@ public class PlatformImpl implements IPlatform {
     }
 
     @Override
-    public Collection<ResourceProvider> getJarProviders() {
-        List<ResourceProvider> providers = new ArrayList<>();
+    public Collection<Pair<String, Pack.ResourcesSupplier>> getJarProviders(PackType type) {
+        List<Pair<String, Pack.ResourcesSupplier>> providers = new ArrayList<>();
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
             .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
-            .forEach(mod ->
-                providers.add(new PathResourceProvider(mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/")))));
+            .forEach(mod -> {
+                Path packPath = mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/static/"));
+                providers.add(new Pair<>(mod.getModId(), s -> new AutoMetadataPathPackResources(s, type, packPath)));
+            });
         return providers;
     }
 
