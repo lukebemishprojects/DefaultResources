@@ -42,6 +42,7 @@ public class DefaultResources {
 
     private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_RESOURCES = new HashMap<>();
     private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new HashMap<>();
+    public static final String GLOBAL_PREFIX = "global";
 
     public static void forMod(Path configDir, Function<String, Path> inJarPathGetter, String modId) {
         Path defaultResourcesMeta = inJarPathGetter.apply(META_FILE_PATH);
@@ -57,11 +58,11 @@ public class DefaultResources {
                     if (extractionState == Config.ExtractionState.UNEXTRACTED) {
                         QUEUED_RESOURCES.put("__extracted_" + modId, (s, type) -> {
                             if (!Files.exists(defaultResources.resolve(type.getDirectory()))) return null;
-                            return () -> new AutoMetadataPathPackResources(s, type, defaultResources);
+                            return () -> new AutoMetadataPathPackResources(s, "", defaultResources, type);
                         });
                         QUEUED_STATIC_RESOURCES.put("__extracted_" + modId, (s, type) -> {
-                            if (!Files.exists(defaultResources.resolve("static").resolve(type.getDirectory()))) return null;
-                            return () -> new AutoMetadataPathPackResources(s, type, defaultResources.resolve("static"));
+                            if (!Files.exists(defaultResources.resolve(GLOBAL_PREFIX+type.getDirectory()))) return null;
+                            return () -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, defaultResources, type);
                         });
                     } else if ((meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
                         Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
@@ -129,10 +130,10 @@ public class DefaultResources {
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
             for (var file : files.toList()) {
                 if (Files.isDirectory(file)) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, type, file);
+                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, "", file, type);
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 } else if (file.getFileName().toString().endsWith(".zip")) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, type, file);
+                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, "", file, type);
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 }
             }
@@ -153,10 +154,10 @@ public class DefaultResources {
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
             for (var file : files.toList()) {
                 if (Files.isDirectory(file)) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, type, file);
+                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type);
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 } else if (file.getFileName().toString().endsWith(".zip")) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, type, file);
+                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type);
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 }
             }
@@ -184,10 +185,6 @@ public class DefaultResources {
     public synchronized static GlobalResourceManager createStaticResourceManager(PackType type) {
         initialize();
         List<Pair<String, Pack.ResourcesSupplier>> sources = new ArrayList<>(getStaticPackResources(type));
-        try (var paths = Files.list(Services.PLATFORM.getGlobalFolder())) {
-            paths.forEach(path -> sources.add(new Pair<>(path.getFileName().toString(), s -> new AutoMetadataPathPackResources(s, type, path))));
-        } catch (IOException ignored) {
-        }
         sources.addAll(Services.PLATFORM.getJarProviders(type));
         return new CombinedResourceManager(type, sources);
     }

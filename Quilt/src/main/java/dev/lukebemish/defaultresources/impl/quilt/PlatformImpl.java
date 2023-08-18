@@ -52,8 +52,8 @@ public class PlatformImpl implements Platform {
         QuiltLoader.getAllMods().forEach(mod -> {
             String modid = mod.metadata().id();
             if (!modid.equals("minecraft")) {
-                Path packPath = mod.rootPath().resolve("static");
-                providers.add(new Pair<>(modid, s -> new AutoMetadataPathPackResources(s, type, packPath)));
+                Path packPath = mod.rootPath();
+                providers.add(new Pair<>(modid, s -> new AutoMetadataPathPackResources(s, "global", packPath, type)));
             }
         });
         return providers;

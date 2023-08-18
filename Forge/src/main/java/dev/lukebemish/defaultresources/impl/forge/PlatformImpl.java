@@ -52,8 +52,8 @@ public class PlatformImpl implements Platform {
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
             .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
             .forEach(mod -> {
-                Path packPath = mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/static/"));
-                providers.add(new Pair<>(mod.getModId(), s -> new AutoMetadataPathPackResources(s, type, packPath)));
+                Path packPath = mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/"));
+                providers.add(new Pair<>(mod.getModId(), s -> new AutoMetadataPathPackResources(s, "global", packPath, type)));
             });
         return providers;
     }

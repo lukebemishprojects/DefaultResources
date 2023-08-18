@@ -6,21 +6,81 @@
 package dev.lukebemish.defaultresources.impl;
 
 import com.google.gson.JsonObject;
+import com.mojang.logging.LogUtils;
+import net.minecraft.FileUtil;
 import net.minecraft.SharedConstants;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.AbstractPackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
+import net.minecraft.server.packs.resources.IoSupplier;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Set;
 
-public class AutoMetadataPathPackResources extends PathPackResources {
+public class AutoMetadataPathPackResources extends AbstractPackResources {
+    private static final Logger LOGGER = LogUtils.getLogger();
 
+    private final String name;
+    private final Path path;
     private final PackType packType;
 
-    public AutoMetadataPathPackResources(String s, PackType packType, Path path) {
-        super(s, path, false);
+    public AutoMetadataPathPackResources(String s, String prefix, Path path, PackType packType) {
+        super(s, false);
+        this.name = prefix+packType.getDirectory();
+        this.path = path;
         this.packType = packType;
+    }
+
+    @Nullable
+    @Override
+    public IoSupplier<InputStream> getRootResource(String... elements) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
+        Path path = this.path.resolve(name).resolve(location.getNamespace());
+        return PathPackResources.getResource(location, path);
+    }
+
+    @Override
+    public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
+        FileUtil.decomposePath(path).get().ifLeft((list) -> {
+            Path namespacePath = this.path.resolve(name).resolve(namespace);
+            PathPackResources.listPath(namespace, namespacePath, list, resourceOutput);
+        }).ifRight((partialResult) -> LOGGER.error("Invalid path {}: {}", path, partialResult.message()));
+    }
+
+    @Override
+    public @NotNull Set<String> getNamespaces(PackType type) {
+        Set<String> set = new HashSet<>();
+        Path path = this.path.resolve(name);
+
+        try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
+            for (Path namespacePath : paths) {
+                if (Files.isDirectory(namespacePath)) {
+                    String namespace = namespacePath.getFileName().toString();
+                    if (namespace.equals(namespace.toLowerCase(Locale.ROOT))) {
+                        set.add(namespace);
+                    }
+                }
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to list path {}", path, e);
+        }
+        return set;
     }
 
     @Nullable
@@ -33,5 +93,10 @@ public class AutoMetadataPathPackResources extends PathPackResources {
             return serializer.fromJson(object);
         }
         return null;
+    }
+
+    @Override
+    public void close() {
+
     }
 }
