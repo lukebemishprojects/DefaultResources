@@ -56,15 +56,15 @@ public class DefaultResources {
                 if (Files.exists(defaultResources)) {
                     Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, Config.ExtractionState.UNEXTRACTED);
                     if (extractionState == Config.ExtractionState.UNEXTRACTED) {
-                        QUEUED_RESOURCES.put("__extracted_" + modId, (s, type) -> {
+                        QUEUED_RESOURCES.put("__unextracted_" + modId, (s, type) -> {
                             if (!Files.exists(defaultResources.resolve(type.getDirectory()))) return null;
                             return () -> new AutoMetadataPathPackResources(s, "", defaultResources, type);
                         });
-                        QUEUED_STATIC_RESOURCES.put("__extracted_" + modId, (s, type) -> {
+                        QUEUED_STATIC_RESOURCES.put("__unextracted_" + modId, (s, type) -> {
                             if (!Files.exists(defaultResources.resolve(GLOBAL_PREFIX+type.getDirectory()))) return null;
                             return () -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, defaultResources, type);
                         });
-                    } else if ((meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
+                    } else if (extractionState == Config.ExtractionState.EXTRACT) {
                         Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
                         if (!meta.zip()) {
                             Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modId);
@@ -76,21 +76,6 @@ public class DefaultResources {
                                 Collections.singletonMap("create", "true"))) {
                                 Path outPath = zipFs.getPath("/");
                                 copyResources(defaultResources, outPath);
-                            }
-                        }
-                        if (meta.createsMarker() && meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get()))) {
-                            try {
-                                Path markerPath = configDir.resolve(meta.markerPath().get());
-                                String comment;
-                                if (meta.markerPath().get().endsWith(".json5") || meta.markerPath().get().endsWith(".json"))
-                                    comment = "// ";
-                                else if (meta.markerPath().get().endsWith(".toml"))
-                                    comment = "# ";
-                                else
-                                    comment = "";
-                                Files.writeString(markerPath, comment + "This is a marker file created by " + modId + ". If the mod is marked as already extracted, default resources will not be re-extracted while this file exists.\n");
-                            } catch (IOException e) {
-                                LOGGER.error("Issues writing marker file at {} for mod {}: ", meta.markerPath(), modId, e);
                             }
                         }
                     }
