@@ -10,7 +10,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 public record ModMetaFile(String resourcesPath, boolean zip) {
     public static final Codec<ModMetaFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.STRING.optionalFieldOf("resources_path", DefaultResources.MOD_ID).forGetter(ModMetaFile::resourcesPath),
-        Codec.BOOL.optionalFieldOf("zip", true).forGetter(ModMetaFile::zip)
+        Codec.STRING.fieldOf("resources_path").forGetter(ModMetaFile::resourcesPath),
+        Codec.BOOL.fieldOf("zip").forGetter(ModMetaFile::zip)
     ).apply(instance, ModMetaFile::new));
 }

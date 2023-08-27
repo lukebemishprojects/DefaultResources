@@ -6,7 +6,6 @@
 package dev.lukebemish.defaultresources.impl.quilt;
 
 import com.mojang.datafixers.util.Pair;
-import dev.lukebemish.defaultresources.api.GlobalResourceManager;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import net.minecraft.server.packs.PackType;
@@ -22,7 +21,6 @@ import java.util.List;
 public class DefaultResourcesQuilt implements ModInitializer {
     @Override
     public void onInitialize(ModContainer mod) {
-        GlobalResourceManager.forceInitialization();
         addPackResources(PackType.SERVER_DATA);
     }
 

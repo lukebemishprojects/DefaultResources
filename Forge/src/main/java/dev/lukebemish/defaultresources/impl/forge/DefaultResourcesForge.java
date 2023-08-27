@@ -6,7 +6,6 @@
 package dev.lukebemish.defaultresources.impl.forge;
 
 import com.mojang.datafixers.util.Pair;
-import dev.lukebemish.defaultresources.api.GlobalResourceManager;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import net.minecraft.SharedConstants;
@@ -31,7 +30,6 @@ import java.util.List;
 public class DefaultResourcesForge {
 
     public DefaultResourcesForge() {
-        GlobalResourceManager.forceInitialization();
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         modbus.register(this);
     }
