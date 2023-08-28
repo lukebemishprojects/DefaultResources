@@ -52,6 +52,9 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     @Override
     public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
         Path path = this.path.resolve(name).resolve(location.getNamespace());
+        if (!Files.isDirectory(path)) {
+            return null;
+        }
         return PathPackResources.getResource(location, path);
     }
 
@@ -59,6 +62,9 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
         FileUtil.decomposePath(path).get().ifLeft((list) -> {
             Path namespacePath = this.path.resolve(name).resolve(namespace);
+            if (!Files.isDirectory(namespacePath)) {
+                return;
+            }
             PathPackResources.listPath(namespace, namespacePath, list, resourceOutput);
         }).ifRight((partialResult) -> LOGGER.error("Invalid path {}: {}", path, partialResult.message()));
     }
@@ -67,6 +73,10 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     public @NotNull Set<String> getNamespaces(PackType type) {
         Set<String> set = new HashSet<>();
         Path path = this.path.resolve(name);
+
+        if (!Files.isDirectory(path)) {
+            return Set.of();
+        }
 
         try (DirectoryStream<Path> paths = Files.newDirectoryStream(path)) {
             for (Path namespacePath : paths) {
