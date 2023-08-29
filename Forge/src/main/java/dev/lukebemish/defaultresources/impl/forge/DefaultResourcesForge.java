@@ -30,6 +30,7 @@ import java.util.List;
 public class DefaultResourcesForge {
 
     public DefaultResourcesForge() {
+        DefaultResources.initialize();
         IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         modbus.register(this);
     }
