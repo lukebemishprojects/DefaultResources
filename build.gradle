@@ -9,6 +9,11 @@ apply from: 'version.gradle'
 modsDotGroovy {
     dslVersion = libs.versions.mdg.dsl.get()
     platform 'multiloader'
+    multiloader {
+        forge = [project(":NeoForge")]
+        fabric = [project(":FabriQuilt")]
+        quilt = [project(":FabriQuilt")]
+    }
 }
 
 subprojects { p ->
@@ -64,8 +69,6 @@ subprojects { p ->
             name 'Quilt (Release)'
             url 'https://maven.quiltmc.org/repository/release/'
         }
-
-        maven { url = 'https://maven.moddinginquisition.org/releases' }
     }
 
     dependencies {

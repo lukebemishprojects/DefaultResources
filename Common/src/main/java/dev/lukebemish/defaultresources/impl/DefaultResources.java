@@ -44,7 +44,7 @@ public class DefaultResources {
     private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new HashMap<>();
     public static final String GLOBAL_PREFIX = "global";
 
-    public static void forMod(Path configDir, Function<String, Path> inJarPathGetter, String modId) {
+    public static void forMod(Function<String, Path> inJarPathGetter, String modId) {
         Path defaultResourcesMeta = inJarPathGetter.apply(META_FILE_PATH);
         if (Files.exists(defaultResourcesMeta)) {
             try (InputStream is = Files.newInputStream(defaultResourcesMeta)) {

@@ -6,7 +6,7 @@
 ModsDotGroovy.make {
     modLoader = 'javafml'
     loaderVersion = '[40,)'
-    issueTrackerUrl = 'https://github.com/lukebemish/defaultresources/issues'
+    issueTrackerUrl = 'https://github.com/lukebemish/DefaultResources/issues'
     license = 'LGPL-3.0-or-later'
 
     mod {
@@ -16,14 +16,20 @@ ModsDotGroovy.make {
         onQuilt {
             group = this.group
         }
-        displayUrl = 'https://github.com/lukebemish/defaultresources'
-        contact.sources = 'https://github.com/lukebemish/defaultresources'
+        displayUrl = 'https://github.com/lukebemish/DefaultResources'
+        contact.sources = 'https://github.com/lukebemish/DefaultResources'
         author 'Luke Bemish'
         description = "A tool for loading and extracting resources provided by mods or by users."
 
         entrypoints {
-            init = 'dev.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuilt'
-            client_init = 'dev.lukebemish.defaultresources.impl.quilt.DefaultResourcesQuiltClient'
+            onQuilt {
+                init = 'dev.lukebemish.defaultresources.impl.fabriquilt.quilt.DefaultResourcesQuilt'
+                client_init = 'dev.lukebemish.defaultresources.impl.fabriquilt.quilt.DefaultResourcesQuiltClient'
+            }
+            onFabric {
+                main = 'dev.lukebemish.defaultresources.impl.fabriquilt.fabric.DefaultResourcesFabric'
+                client = 'dev.lukebemish.defaultresources.impl.fabriquilt.fabric.DefaultResourcesFabricClient'
+            }
         }
 
         dependencies {
@@ -32,9 +38,17 @@ ModsDotGroovy.make {
             }
             minecraft = this.minecraftVersionRange
             onQuilt {
-                quiltLoader = ">=${this.quiltLoaderVersion}"
-                quilt_base = ">=${this.libs.versions.qsl}"
+                quiltLoader = ">=${this.libs.versions.quilt.loader}"
+                quilted_fabric_api = ">=${this.libs.versions.qfapi}"
+            }
+            onFabric {
+                mod 'fabric-api', {
+                    versionRange = ">=${this.libs.versions.qfapi.split('-')[0].split(/\+/)[1]}"
+                }
             }
         }
+    }
+    onFabric {
+        mixin = ['mixin.defaultresources.fabric.json']
     }
 }

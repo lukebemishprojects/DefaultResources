@@ -6,13 +6,6 @@ apply plugin: 'org.quiltmc.loom'
 
 archivesBaseName = "${mod_id}-common-${libs.versions.minecraft.get()}"
 
-repositories {
-    maven {
-        name = 'Forge / Mixin'
-        url = 'https://maven.minecraftforge.net'
-    }
-}
-
 loom {
     runConfigs.configureEach {
         ideConfigGenerated = false

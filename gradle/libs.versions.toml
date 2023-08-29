@@ -1,22 +1,22 @@
 [versions]
-minecraft = "1.20"
-parchment_minecraft = "1.19.3"
-parchment_mappings = "2023.03.12"
+minecraft = "1.20.1"
+parchment_minecraft = "1.20.1"
+parchment_mappings = "2023.08.20"
 
-forge = "1.20-46.0.2"
+neoforge = "1.20.1-47.1.75"
 mixin = "0.8.5"
 
-quilt_loader = "0.18.10"
-qsl = "6.0.1+1.20"
+quilt_loader = "0.20.1"
+qfapi = "7.1.2+0.87.0-1.20.1"
 
 mdg_plugin = "1.4.1"
-mdg_dsl = "1.5.0"
-autoservice = "1.1.0"
+mdg_dsl = "1.5.1"
+autoservice = "1.1.1"
 
 quilt_loom = "1.2.3"
 quilt_licenser = "2.0.1"
 
-forgegradle = "6.0.6"
+neogradle = "6.0.18"
 librarian = "1.2.0"
 mixingradle = "0.7.33"
 
@@ -26,18 +26,18 @@ jetbrains_annotations = "24.0.1"
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 
 quilt_loader = { module = "org.quiltmc:quilt-loader", version.ref = "quilt_loader" }
-qsl = { module = "org.quiltmc:qsl", version.ref = "qsl" }
+qfapi = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.ref = "qfapi" }
 
-forge = { module = "net.minecraftforge:forge", version.ref = "forge" }
+neoforge = { module = "net.neoforged:forge", version.ref = "neoforge" }
 
 jetbrains_annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations" }
 autoservice = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
 
 [plugins]
 
-mdg_plugin = { id = "io.github.groovymc.modsdotgroovy", version.ref = "mdg_plugin" }
+mdg_plugin = { id = "org.groovymc.modsdotgroovy", version.ref = "mdg_plugin" }
 quilt_loom = { id = "org.quiltmc.loom", version.ref = "quilt_loom" }
 quilt_licenser = { id = "org.quiltmc.gradle.licenser", version.ref = "quilt_licenser" }
-forgegradle = { id = "net.minecraftforge.gradle", version.ref = "forgegradle" }
+neogradle = { id = "net.neoforged.gradle", version.ref = "neogradle" }
 librarian = { id = "org.parchmentmc.librarian.forgegradle", version.ref = "librarian" }
 mixingradle = {id = "org.spongepowered.mixin", version.ref = "mixingradle" }
