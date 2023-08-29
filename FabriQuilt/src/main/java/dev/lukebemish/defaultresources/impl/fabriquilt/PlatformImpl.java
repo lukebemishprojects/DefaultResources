@@ -11,6 +11,7 @@ import dev.lukebemish.defaultresources.impl.AutoMetadataPathPackResources;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.Platform;
+import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
@@ -23,6 +24,7 @@ import java.util.*;
 @AutoService(Platform.class)
 public class PlatformImpl implements Platform {
     @SuppressWarnings("deprecation")
+    @Override
     public Path getGlobalFolder() {
         return FabricLoader.getInstance().getGameDir().resolve("globalresources");
     }
@@ -71,5 +73,11 @@ public class PlatformImpl implements Platform {
             }
         });
         return out;
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public boolean isClient() {
+        return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;
     }
 }

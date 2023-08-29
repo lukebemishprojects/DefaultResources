@@ -21,5 +21,6 @@ public interface FabriquiltPlatform {
             return FabricPlatform.INSTANCE;
         }
     }
+
     void forAllMods(BiConsumer<String, Path> consumer);
 }

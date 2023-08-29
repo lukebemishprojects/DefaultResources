@@ -13,6 +13,7 @@ import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.Platform;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
 
@@ -71,5 +72,10 @@ public class PlatformImpl implements Platform {
                 new Pair<>(mod.getModId(), mod.getOwningFile().getFile().findResource(relative)))
             .filter(it -> it.getSecond() != null && Files.exists(it.getSecond()))
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (a, b) -> a));
+    }
+
+    @Override
+    public boolean isClient() {
+        return FMLLoader.getDist() == Dist.CLIENT;
     }
 }

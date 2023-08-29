@@ -44,6 +44,9 @@ public class DefaultResources {
     private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new HashMap<>();
     public static final String GLOBAL_PREFIX = "global";
 
+    public static final GlobalResourceManager STAtIC_ASSETS = createStaticResourceManager(PackType.CLIENT_RESOURCES);
+    public static final GlobalResourceManager STATIC_DATA = createStaticResourceManager(PackType.SERVER_DATA);
+
     public static void forMod(Function<String, Path> inJarPathGetter, String modId) {
         Path defaultResourcesMeta = inJarPathGetter.apply(META_FILE_PATH);
         if (Files.exists(defaultResourcesMeta)) {

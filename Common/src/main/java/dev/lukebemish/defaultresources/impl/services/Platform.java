@@ -23,4 +23,6 @@ public interface Platform {
     Path getConfigDir();
 
     Map<String, Path> getExistingModdedPaths(String relative);
+
+    boolean isClient();
 }
