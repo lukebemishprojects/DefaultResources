@@ -30,6 +30,9 @@ public class WrappingResourceManager implements GlobalResourceManager {
     private final String prefix;
 
     private static void checkValidPrefix(String prefix) {
+        if (prefix.isEmpty()) {
+            throw new IllegalArgumentException("Invalid prefix; prefixes must not be empty.");
+        }
         for (char c : prefix.toCharArray()) {
             if (c == '_' || c == '-' || c >= 'a' && c <= 'z' || c >= '0' && c <= '9') {
                 continue;
