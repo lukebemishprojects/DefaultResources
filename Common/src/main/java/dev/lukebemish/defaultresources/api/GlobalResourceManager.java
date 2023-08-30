@@ -30,7 +30,7 @@ public interface GlobalResourceManager extends ResourceManager {
         if (!Services.PLATFORM.isClient()) {
             throw new IllegalStateException("Cannot create client resource manager on dedicated server");
         }
-        return DefaultResources.STAtIC_ASSETS;
+        return DefaultResources.STATIC_ASSETS;
     }
 
     /**
