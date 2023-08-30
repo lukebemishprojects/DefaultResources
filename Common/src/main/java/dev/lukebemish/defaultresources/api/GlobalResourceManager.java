@@ -20,7 +20,7 @@ public interface GlobalResourceManager extends ResourceManager {
 
     /**
      * Provides a resource manager for global assets. Global assets are data that is not specific to a world, and is
-     * required only on the client. The acquired resource manager should be made more specific with {@link #wrap(String)}.
+     * required only on the client. The acquired resource manager should be made more specific with {@link #prefix(String)}.
      * @return a resource manager which loads resources in {@code globalassets}
      * @throws IllegalStateException if called on a dedicated server
      */
@@ -35,7 +35,7 @@ public interface GlobalResourceManager extends ResourceManager {
 
     /**
      * Provides a resource manager for global data. Global data is data that is not specific to a world, and is required
-     * on the server. The acquired resource manager should be made more specific with {@link #wrap(String)}.
+     * on the server. The acquired resource manager should be made more specific with {@link #prefix(String)}.
      * @return a resource manager which loads resources in {@code globaldata}
      */
     @NotNull
@@ -52,7 +52,7 @@ public interface GlobalResourceManager extends ResourceManager {
     @NotNull
     @Contract(value = "_ -> new", pure = true)
     @ApiStatus.NonExtendable
-    default GlobalResourceManager wrap(String prefix) {
+    default GlobalResourceManager prefix(String prefix) {
         return new WrappingResourceManager(this, prefix);
     }
 }
