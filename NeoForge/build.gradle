@@ -76,7 +76,8 @@ dependencies {
 }
 
 mixin {
-
+    add project(":Common").sourceSets.main, 'defaultresources.refmap.json'
+    config 'mixin.defaultresources.json'
 }
 
 tasks.withType(JavaCompile) {

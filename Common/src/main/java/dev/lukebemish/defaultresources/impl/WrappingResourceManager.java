@@ -6,21 +6,20 @@
 package dev.lukebemish.defaultresources.impl;
 
 import dev.lukebemish.defaultresources.api.GlobalResourceManager;
+import dev.lukebemish.defaultresources.impl.mixin.ResourceAccessor;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceMetadata;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -54,22 +53,53 @@ public class WrappingResourceManager implements GlobalResourceManager {
 
     @Override
     public @NotNull List<Resource> getResourceStack(ResourceLocation location) {
-        return wrapped.getResourceStack(location.withPrefix(prefix));
+        List<Resource> out = new ArrayList<>();
+        for (var resource : wrapped.getResourceStack(location.withPrefix(prefix))) {
+            out.add(wrapResource(resource));
+        }
+        return out;
     }
 
     @Override
     public @NotNull Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
-        return wrapped.listResources(prefix + path, filter);
+        Map<ResourceLocation, Resource> out = new HashMap<>();
+        for (var entry : wrapped.listResources(prefix + path, filter).entrySet()) {
+            out.put(wrapLocation(entry.getKey()), wrapResource(entry.getValue()));
+        }
+        return out;
     }
 
     @Override
     public @NotNull Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
-        return wrapped.listResourceStacks(prefix + path, filter);
+        Map<ResourceLocation, List<Resource>> out = new HashMap<>();
+        for (var entry : wrapped.listResourceStacks(prefix + path, filter).entrySet()) {
+            List<Resource> resources = new ArrayList<>();
+            for (var resource : entry.getValue()) {
+                resources.add(wrapResource(resource));
+            }
+            out.put(wrapLocation(entry.getKey()), resources);
+        }
+        return out;
     }
 
     @Override
     public @NotNull Stream<PackResources> listPacks() {
-        return wrapped.listPacks().map(pack -> new PackResources() {
+        return wrapped.listPacks().map(this::wrapResources);
+    }
+
+    private Resource wrapResource(Resource resource) {
+        if (((ResourceAccessor) resource).getMetadataSupplier() == ResourceMetadata.EMPTY_SUPPLIER) {
+            return new Resource(wrapResources(resource.source()), ((ResourceAccessor) resource).getStreamSupplier());
+        }
+        return new Resource(wrapResources(resource.source()), ((ResourceAccessor) resource).getStreamSupplier(), ((ResourceAccessor) resource).getMetadataSupplier());
+    }
+
+    private ResourceLocation wrapLocation(ResourceLocation location) {
+        return location.withPath(s -> s.substring(prefix.length()));
+    }
+
+    private PackResources wrapResources(PackResources pack) {
+        return new PackResources() {
             @Nullable
             @Override
             public IoSupplier<InputStream> getRootResource(String... elements) {
@@ -84,7 +114,9 @@ public class WrappingResourceManager implements GlobalResourceManager {
 
             @Override
             public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
-                pack.listResources(packType, namespace, prefix+path, resourceOutput);
+                pack.listResources(packType, namespace, prefix+path, (rl, ioSupplier) -> {
+                    resourceOutput.accept(wrapLocation(rl), ioSupplier);
+                });
             }
 
             @Override
@@ -112,11 +144,11 @@ public class WrappingResourceManager implements GlobalResourceManager {
             public void close() {
                 pack.close();
             }
-        });
+        };
     }
 
     @Override
     public @NotNull Optional<Resource> getResource(ResourceLocation location) {
-        return wrapped.getResource(location.withPrefix(prefix));
+        return wrapped.getResource(location.withPrefix(prefix)).map(this::wrapResource);
     }
 }
