@@ -6,7 +6,7 @@
 ModsDotGroovy.make {
     modLoader = 'javafml'
     loaderVersion = '[40,)'
-    issueTrackerUrl = 'https://github.com/lukebemish/DefaultResources/issues'
+    issueTrackerUrl = 'https://github.com/lukebemishprojects/DefaultResources/issues'
     license = 'LGPL-3.0-or-later'
 
     mod {
@@ -16,8 +16,8 @@ ModsDotGroovy.make {
         onQuilt {
             group = this.group
         }
-        displayUrl = 'https://github.com/lukebemish/DefaultResources'
-        contact.sources = 'https://github.com/lukebemish/DefaultResources'
+        displayUrl = 'https://github.com/lukebemishprojects/DefaultResources'
+        contact.sources = 'https://github.com/lukebemishprojects/DefaultResources'
         author 'Luke Bemish'
         description = "A tool for loading and extracting resources provided by mods or by users."
 
