@@ -15,8 +15,8 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.PathPackResources;
 import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.IoSupplier;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     }
 
     @Override
-    public @NotNull Set<String> getNamespaces(PackType type) {
+    public @NonNull Set<String> getNamespaces(PackType type) {
         Set<String> set = new HashSet<>();
         Path path = this.path.resolve(name);
 

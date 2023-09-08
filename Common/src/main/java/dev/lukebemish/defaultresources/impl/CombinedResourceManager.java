@@ -14,7 +14,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceMetadata;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,12 +46,12 @@ public class CombinedResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Set<String> getNamespaces() {
+    public @NonNull Set<String> getNamespaces() {
         return namespaceMap.keySet();
     }
 
     @Override
-    public @NotNull List<Resource> getResourceStack(ResourceLocation location) {
+    public @NonNull List<Resource> getResourceStack(ResourceLocation location) {
         List<Resource> builder = new ArrayList<>();
         getResourceStream(location)
             .forEach(builder::add);
@@ -59,7 +59,7 @@ public class CombinedResourceManager implements GlobalResourceManager {
         return Collections.unmodifiableList(builder);
     }
 
-    @NotNull
+    @NonNull
     private Stream<Resource> getResourceStream(ResourceLocation location) {
         return namespaceMap.getOrDefault(location.getNamespace(), List.of()).stream()
             .map(p -> {
@@ -87,7 +87,7 @@ public class CombinedResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
+    public @NonNull Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
         Map<ResourceLocation, Resource> builder = new HashMap<>();
         BiConsumer<ResourceLocation, Resource> consumer = builder::put;
         findResources(path, filter, consumer);
@@ -95,7 +95,7 @@ public class CombinedResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
+    public @NonNull Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
         Map<ResourceLocation, List<Resource>> builder = new HashMap<>();
         BiConsumer<ResourceLocation, Resource> consumer = (rl, r) -> builder.computeIfAbsent(rl, k -> new ArrayList<>()).add(r);
         findResources(path, filter, consumer);
@@ -134,12 +134,12 @@ public class CombinedResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Stream<PackResources> listPacks() {
+    public @NonNull Stream<PackResources> listPacks() {
         return resources.stream();
     }
 
     @Override
-    public @NotNull Optional<Resource> getResource(ResourceLocation location) {
+    public @NonNull Optional<Resource> getResource(ResourceLocation location) {
         AtomicReference<Resource> resource = new AtomicReference<>();
         getResourceStream(location)
             .forEach(resource::set);

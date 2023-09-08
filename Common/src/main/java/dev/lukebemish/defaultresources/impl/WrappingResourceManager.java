@@ -14,8 +14,8 @@ import net.minecraft.server.packs.metadata.MetadataSectionSerializer;
 import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceMetadata;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,12 +47,12 @@ public class WrappingResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Set<String> getNamespaces() {
+    public @NonNull Set<String> getNamespaces() {
         return wrapped.getNamespaces();
     }
 
     @Override
-    public @NotNull List<Resource> getResourceStack(ResourceLocation location) {
+    public @NonNull List<Resource> getResourceStack(ResourceLocation location) {
         List<Resource> out = new ArrayList<>();
         for (var resource : wrapped.getResourceStack(location.withPrefix(prefix))) {
             out.add(wrapResource(resource));
@@ -61,7 +61,7 @@ public class WrappingResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
+    public @NonNull Map<ResourceLocation, Resource> listResources(String path, Predicate<ResourceLocation> filter) {
         Map<ResourceLocation, Resource> out = new HashMap<>();
         for (var entry : wrapped.listResources(prefix + path, filter).entrySet()) {
             out.put(wrapLocation(entry.getKey()), wrapResource(entry.getValue()));
@@ -70,7 +70,7 @@ public class WrappingResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
+    public @NonNull Map<ResourceLocation, List<Resource>> listResourceStacks(String path, Predicate<ResourceLocation> filter) {
         Map<ResourceLocation, List<Resource>> out = new HashMap<>();
         for (var entry : wrapped.listResourceStacks(prefix + path, filter).entrySet()) {
             List<Resource> resources = new ArrayList<>();
@@ -83,7 +83,7 @@ public class WrappingResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Stream<PackResources> listPacks() {
+    public @NonNull Stream<PackResources> listPacks() {
         return wrapped.listPacks().map(this::wrapResources);
     }
 
@@ -114,13 +114,12 @@ public class WrappingResourceManager implements GlobalResourceManager {
 
             @Override
             public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
-                pack.listResources(packType, namespace, prefix+path, (rl, ioSupplier) -> {
-                    resourceOutput.accept(wrapLocation(rl), ioSupplier);
-                });
+                pack.listResources(packType, namespace, prefix+path, (rl, ioSupplier) ->
+                    resourceOutput.accept(wrapLocation(rl), ioSupplier));
             }
 
             @Override
-            public @NotNull Set<String> getNamespaces(PackType type) {
+            public @NonNull Set<String> getNamespaces(PackType type) {
                 return pack.getNamespaces(type);
             }
 
@@ -131,7 +130,7 @@ public class WrappingResourceManager implements GlobalResourceManager {
             }
 
             @Override
-            public @NotNull String packId() {
+            public @NonNull String packId() {
                 return pack.packId();
             }
 
@@ -148,7 +147,7 @@ public class WrappingResourceManager implements GlobalResourceManager {
     }
 
     @Override
-    public @NotNull Optional<Resource> getResource(ResourceLocation location) {
+    public @NonNull Optional<Resource> getResource(ResourceLocation location) {
         return wrapped.getResource(location.withPrefix(prefix)).map(this::wrapResource);
     }
 }

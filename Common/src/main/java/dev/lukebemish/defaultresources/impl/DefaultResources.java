@@ -16,7 +16,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -112,7 +112,7 @@ public class DefaultResources {
         Config.INSTANCE.get().save();
     }
 
-    @NotNull
+    @NonNull
     public static List<Pair<String, Pack.ResourcesSupplier>> getPackResources(PackType type) {
         List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
@@ -136,7 +136,7 @@ public class DefaultResources {
         return packs;
     }
 
-    @NotNull
+    @NonNull
     private static List<Pair<String, Pack.ResourcesSupplier>> getStaticPackResources(PackType type) {
         List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {

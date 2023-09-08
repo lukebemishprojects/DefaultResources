@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 public class ResourceLoader {
     private ResourceLoader() {}
 
-    public static ResourceLoader CLIENT = new ResourceLoader();
-    public static ResourceLoader SERVER = new ResourceLoader();
+    public static final ResourceLoader CLIENT = new ResourceLoader();
+    public static final ResourceLoader SERVER = new ResourceLoader();
 
     private final List<Supplier<List<PackResources>>> packs = new ArrayList<>();
 

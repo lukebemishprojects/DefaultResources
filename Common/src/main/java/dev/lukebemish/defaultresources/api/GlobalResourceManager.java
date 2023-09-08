@@ -11,7 +11,7 @@ import dev.lukebemish.defaultresources.impl.WrappingResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.Contract;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 /**
  * A resource manager that can be used to load resources from global (static) resources.
@@ -24,7 +24,7 @@ public interface GlobalResourceManager extends ResourceManager {
      * @return a resource manager which loads resources in {@code globalassets}
      * @throws IllegalStateException if called on a dedicated server
      */
-    @NotNull
+    @NonNull
     @Contract(pure = true)
     static GlobalResourceManager getGlobalAssets() {
         if (!Services.PLATFORM.isClient()) {
@@ -38,7 +38,7 @@ public interface GlobalResourceManager extends ResourceManager {
      * on the server. The acquired resource manager should be made more specific with {@link #prefix(String)}.
      * @return a resource manager which loads resources in {@code globaldata}
      */
-    @NotNull
+    @NonNull
     @Contract(pure = true)
     static GlobalResourceManager getGlobalData() {
         return DefaultResources.STATIC_DATA;
@@ -49,7 +49,7 @@ public interface GlobalResourceManager extends ResourceManager {
      * @param prefix the prefix to use for the resource manager
      * @return a new resource manager, which loads resources in {@code global[data/assets]/[namespace]/[original path]/[prefix]}.
      */
-    @NotNull
+    @NonNull
     @Contract(value = "_ -> new", pure = true)
     @ApiStatus.NonExtendable
     default GlobalResourceManager prefix(String prefix) {

@@ -21,6 +21,7 @@ librarian = "1.2.0"
 mixingradle = "0.7.33"
 
 jetbrains_annotations = "24.0.1"
+jspecify = "0.3.0"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -31,6 +32,8 @@ qfapi = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.
 neoforge = { module = "net.neoforged:forge", version.ref = "neoforge" }
 
 jetbrains_annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations" }
+jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
+
 autoservice = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
 
 [plugins]
