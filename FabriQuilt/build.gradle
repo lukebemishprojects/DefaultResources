@@ -36,7 +36,7 @@ dependencies {
     modLocalRuntime libs.qfapi
     modCompileOnly libs.qfapi
 
-    implementation project(":Common")
+    compileOnly project(":Common")
 
     compileOnly libs.autoservice
     annotationProcessor libs.autoservice
