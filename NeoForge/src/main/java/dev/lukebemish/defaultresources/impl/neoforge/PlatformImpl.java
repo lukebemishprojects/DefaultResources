@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-package dev.lukebemish.defaultresources.impl.forge;
+package dev.lukebemish.defaultresources.impl.neoforge;
 
 import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
@@ -16,6 +16,7 @@ import net.minecraft.server.packs.repository.Pack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.forgespi.language.IModInfo;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,7 +43,7 @@ public class PlatformImpl implements Platform {
             DefaultResources.LOGGER.error(e);
         }
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
-            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("neoforge") || mod.getModId().equals("minecraft")))
+            .filter(PlatformImpl::isExtractable)
             .forEach(mod ->
                 DefaultResources.forMod(mod.getOwningFile().getFile()::findResource, mod.getModId()));
     }
@@ -51,7 +52,7 @@ public class PlatformImpl implements Platform {
     public Collection<Pair<String, Pack.ResourcesSupplier>> getJarProviders(PackType type) {
         List<Pair<String, Pack.ResourcesSupplier>> providers = new ArrayList<>();
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
-            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
+            .filter(PlatformImpl::isExtractable)
             .forEach(mod -> {
                 Path packPath = mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/"));
                 providers.add(new Pair<>(mod.getModId(), s -> new AutoMetadataPathPackResources(s, "global", packPath, type)));
@@ -67,11 +68,15 @@ public class PlatformImpl implements Platform {
     @Override
     public Map<String, Path> getExistingModdedPaths(String relative) {
         return FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
-            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
+            .filter(PlatformImpl::isExtractable)
             .map(mod ->
                 new Pair<>(mod.getModId(), mod.getOwningFile().getFile().findResource(relative)))
             .filter(it -> it.getSecond() != null && Files.exists(it.getSecond()))
             .collect(Collectors.toMap(Pair::getFirst, Pair::getSecond, (a, b) -> a));
+    }
+
+    private static boolean isExtractable(IModInfo mod) {
+        return !mod.getModId().equals("forge") && !mod.getModId().equals("neoforge") && !mod.getModId().equals("minecraft");
     }
 
     @Override

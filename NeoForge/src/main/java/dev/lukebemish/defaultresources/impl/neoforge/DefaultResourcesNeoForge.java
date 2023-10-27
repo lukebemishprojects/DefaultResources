@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-package dev.lukebemish.defaultresources.impl.forge;
+package dev.lukebemish.defaultresources.impl.neoforge;
 
 import com.mojang.datafixers.util.Pair;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
