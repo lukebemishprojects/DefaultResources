@@ -54,4 +54,11 @@ ModsDotGroovy.make {
             'mixin.defaultresources.json'
         ]
     }
+    onQuilt {
+        onFabric {
+            mixin = [
+                'mixin.defaultresources.json'
+            ]
+        }
+    }
 }
