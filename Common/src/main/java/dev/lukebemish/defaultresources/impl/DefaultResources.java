@@ -10,13 +10,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.JsonOps;
-import dev.lukebemish.defaultresources.api.ResourceProvider;
+import dev.lukebemish.defaultresources.api.GlobalResourceManager;
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -40,28 +40,14 @@ public class DefaultResources {
 
     public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
 
-    public static ResourceProvider RESOURCE_PROVIDER;
-
-    private static final List<ResourceProvider> QUEUED_PROVIDERS = new ArrayList<>();
     private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_RESOURCES = new HashMap<>();
+    private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new HashMap<>();
+    public static final String GLOBAL_PREFIX = "global";
 
-    public static ResourceProvider assembleResourceProvider() {
-        List<ResourceProvider> providers = new ArrayList<>(QUEUED_PROVIDERS);
-        try (var paths = Files.list(Services.PLATFORM.getGlobalFolder())) {
-            paths.forEach(path -> {
-                if (Files.isDirectory(path)) {
-                    providers.add(new PathResourceProvider(path));
-                } else if (path.getFileName().toString().endsWith(".zip")) {
-                    providers.add(new ZipResourceProvider(path));
-                }
-            });
-        } catch (IOException ignored) {
-        }
-        providers.addAll(Services.PLATFORM.getJarProviders());
-        return new GroupedResourceProvider(providers);
-    }
+    public static final GlobalResourceManager STATIC_ASSETS = createStaticResourceManager(PackType.CLIENT_RESOURCES);
+    public static final GlobalResourceManager STATIC_DATA = createStaticResourceManager(PackType.SERVER_DATA);
 
-    public static void forMod(Path configDir, Function<String, Path> inJarPathGetter, String modId) {
+    public static void forMod(Function<String, Path> inJarPathGetter, String modId) {
         Path defaultResourcesMeta = inJarPathGetter.apply(META_FILE_PATH);
         if (Files.exists(defaultResourcesMeta)) {
             try (InputStream is = Files.newInputStream(defaultResourcesMeta)) {
@@ -73,12 +59,15 @@ public class DefaultResources {
                 if (Files.exists(defaultResources)) {
                     Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, Config.ExtractionState.UNEXTRACTED);
                     if (extractionState == Config.ExtractionState.UNEXTRACTED) {
-                        QUEUED_PROVIDERS.add(new PathResourceProvider(defaultResources));
-                        QUEUED_RESOURCES.put("__extracted_" + modId, (s, type) -> {
+                        QUEUED_RESOURCES.put("__unextracted_" + modId, (s, type) -> {
                             if (!Files.exists(defaultResources.resolve(type.getDirectory()))) return null;
-                            return () -> new AutoMetadataFolderPackResources(s, type, defaultResources);
+                            return () -> new AutoMetadataPathPackResources(s, "", defaultResources, type);
                         });
-                    } else if ((meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get())) && extractionState.extractIfMissing) || extractionState.extractRegardless) {
+                        QUEUED_STATIC_RESOURCES.put("__unextracted_" + modId, (s, type) -> {
+                            if (!Files.exists(defaultResources.resolve(GLOBAL_PREFIX+type.getDirectory()))) return null;
+                            return () -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, defaultResources, type);
+                        });
+                    } else if (extractionState == Config.ExtractionState.EXTRACT) {
                         Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.EXTRACTED);
                         if (!meta.zip()) {
                             Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modId);
@@ -90,21 +79,6 @@ public class DefaultResources {
                                 Collections.singletonMap("create", "true"))) {
                                 Path outPath = zipFs.getPath("/");
                                 copyResources(defaultResources, outPath);
-                            }
-                        }
-                        if (meta.createsMarker() && meta.markerPath().isPresent() && !Files.exists(configDir.resolve(meta.markerPath().get()))) {
-                            try {
-                                Path markerPath = configDir.resolve(meta.markerPath().get());
-                                String comment;
-                                if (meta.markerPath().get().endsWith(".json5") || meta.markerPath().get().endsWith(".json"))
-                                    comment = "// ";
-                                else if (meta.markerPath().get().endsWith(".toml"))
-                                    comment = "# ";
-                                else
-                                    comment = "";
-                                Files.writeString(markerPath, comment + "This is a marker file created by " + modId + ". If the mod is marked as already extracted, default resources will not be re-extracted while this file exists.\n");
-                            } catch (IOException e) {
-                                LOGGER.error("Issues writing marker file at {} for mod {}: ", meta.markerPath(), modId, e);
                             }
                         }
                     }
@@ -138,16 +112,30 @@ public class DefaultResources {
         Config.INSTANCE.get().save();
     }
 
-    @NotNull
+    public static Pack.ResourcesSupplier wrap(Function<String, PackResources> function) {
+        return new Pack.ResourcesSupplier() {
+            @Override
+            public @NonNull PackResources openPrimary(String string) {
+                return function.apply(string);
+            }
+
+            @Override
+            public @NonNull PackResources openFull(String string, Pack.Info info) {
+                return function.apply(string);
+            }
+        };
+    }
+
+    @NonNull
     public static List<Pair<String, Pack.ResourcesSupplier>> getPackResources(PackType type) {
         List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
             for (var file : files.toList()) {
                 if (Files.isDirectory(file)) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataFolderPackResources(s, type, file);
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, "", file, type));
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 } else if (file.getFileName().toString().endsWith(".zip")) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataFilePackResources(s, type, file.toFile());
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, "", file, type));
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 }
             }
@@ -157,8 +145,49 @@ public class DefaultResources {
         QUEUED_RESOURCES.forEach((s, biFunction) -> {
             Supplier<PackResources> resources = biFunction.apply(s, type);
             if (resources == null) return;
-            packs.add(new Pair<>(s, str -> resources.get()));
+            packs.add(new Pair<>(s, wrap(str -> resources.get())));
         });
         return packs;
+    }
+
+    @NonNull
+    private static List<Pair<String, Pack.ResourcesSupplier>> getStaticPackResources(PackType type) {
+        List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
+        try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
+            for (var file : files.toList()) {
+                if (Files.isDirectory(file)) {
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type));
+                    packs.add(new Pair<>(file.getFileName().toString(), packResources));
+                } else if (file.getFileName().toString().endsWith(".zip")) {
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type));
+                    packs.add(new Pair<>(file.getFileName().toString(), packResources));
+                }
+            }
+        } catch (IOException ignored) {
+
+        }
+        QUEUED_STATIC_RESOURCES.forEach((s, biFunction) -> {
+            Supplier<PackResources> resources = biFunction.apply(s, type);
+            if (resources == null) return;
+            packs.add(new Pair<>(s, wrap(str -> resources.get())));
+        });
+        return packs;
+    }
+
+    private volatile static boolean GLOBAL_SETUP = false;
+
+    public synchronized static void initialize() {
+        if (!GLOBAL_SETUP) {
+            GLOBAL_SETUP = true;
+            Services.PLATFORM.extractResources();
+            DefaultResources.cleanupExtraction();
+        }
+    }
+
+    public synchronized static GlobalResourceManager createStaticResourceManager(PackType type) {
+        initialize();
+        List<Pair<String, Pack.ResourcesSupplier>> sources = new ArrayList<>(getStaticPackResources(type));
+        sources.addAll(Services.PLATFORM.getJarProviders(type));
+        return new CombinedResourceManager(type, sources);
     }
 }

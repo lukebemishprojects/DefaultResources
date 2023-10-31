@@ -12,10 +12,9 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.util.StringRepresentable;
-import org.jetbrains.annotations.NotNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -52,16 +51,8 @@ public record Config(HashMap<String, ExtractionState> extract) {
         }
         var map = new HashMap<>(config.extract());
         Services.PLATFORM.getExistingModdedPaths(DefaultResources.META_FILE_PATH).forEach((modId, metaPath) -> {
-            try (var is = Files.newInputStream(metaPath)) {
-                JsonElement object = DefaultResources.GSON.fromJson(new InputStreamReader(is), JsonElement.class);
-                ModMetaFile metaFile = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, object).getOrThrow(false, e -> {
-                });
-                if (!map.containsKey(modId)) {
-                    map.put(modId, metaFile.extractsByDefault() ? ExtractionState.EXTRACT : ExtractionState.UNEXTRACTED);
-                }
-            } catch (IOException | RuntimeException e) {
-                DefaultResources.LOGGER.warn("We thought there was a readable {} for mod {}, but we got an error when reading it!",
-                    DefaultResources.META_FILE_PATH, modId, e);
+            if (!map.containsKey(modId)) {
+                map.put(modId, ExtractionState.UNEXTRACTED);
             }
         });
         config = new Config(map);
@@ -98,20 +89,12 @@ public record Config(HashMap<String, ExtractionState> extract) {
     }
 
     enum ExtractionState implements StringRepresentable {
-        UNEXTRACTED(false, false),
-        EXTRACT(true, true),
-        EXTRACTED(true, false);
-
-        public final boolean extractIfMissing;
-        public final boolean extractRegardless;
-
-        ExtractionState(boolean extractIfMissing, boolean extractRegardless) {
-            this.extractIfMissing = extractIfMissing;
-            this.extractRegardless = extractRegardless;
-        }
+        UNEXTRACTED,
+        EXTRACT,
+        EXTRACTED;
 
         @Override
-        public @NotNull String getSerializedName() {
+        public @NonNull String getSerializedName() {
             return name().toLowerCase(Locale.ROOT);
         }
     }

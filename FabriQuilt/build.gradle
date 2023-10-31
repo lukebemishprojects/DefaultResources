@@ -1,0 +1,78 @@
+plugins {
+    id 'maven-publish'
+}
+
+apply plugin: 'fabric-loom'
+
+dependencies {
+    minecraft libs.minecraft
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.minecraft.get()}:${libs.versions.parchment.mappings.get()}@zip")
+    }
+
+    modImplementation libs.fabric.loader
+    modImplementation libs.fabric.api
+
+    compileOnly project(":Common")
+
+    compileOnly libs.autoservice
+    annotationProcessor libs.autoservice
+}
+
+loom {
+    runs {
+        client {
+            client()
+            setConfigName("Quilt Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Quilt Server")
+            ideConfigGenerated(true)
+            runDir("runserver")
+        }
+    }
+
+    mixin {
+        defaultRefmapName = "defaultresources.refmap.json"
+    }
+}
+
+processResources {
+    from project(":Common").sourceSets.main.resources
+}
+
+tasks.named('compileJava',JavaCompile).configure {
+    source(project(":Common").sourceSets.main.allSource)
+}
+
+sourcesJar {
+    from project(":Common").sourceSets.main.allSource
+}
+
+javadocJar {
+    from project(":Common").sourceSets.main.allJava
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${mod_name}" }
+    }
+}
+
+tasks.jar.finalizedBy(tasks.remapJar)
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId base.archivesName.get()
+        }
+    }
+
+    repositories {
+    }
+}

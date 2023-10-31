@@ -1,17 +1,12 @@
 pluginManagement {
-
     repositories {
-
         maven {
             name = 'Fabric'
             url = 'https://maven.fabricmc.net/'
         }
 
-        maven { url = 'https://maven.minecraftforge.net' }
-
         maven {
-            name = 'Sponge Snapshots'
-            url = 'https://repo.spongepowered.org/repository/maven-public/'
+            url = 'https://maven.neoforged.net'
         }
 
         maven {
@@ -20,30 +15,19 @@ pluginManagement {
         }
 
         maven {
-            name = 'Quilt (Snapshot)'
-            url = 'https://maven.quiltmc.org/repository/snapshot'
+            name = "Luke's Maven"
+            url = 'https://maven.lukebemish.dev/releases'
         }
 
         maven {
-            name = 'Cotton'
-            url = 'https://server.bbkr.space/artifactory/libs-release/'
+            name = 'ParchmentMC'
+            url = 'https://maven.parchmentmc.org'
         }
-
-        maven { url = 'https://maven.moddinginquisition.org/releases' }
-
-        maven { url = 'https://maven.parchmentmc.org' }
 
         mavenCentral()
         gradlePluginPortal()
     }
-    resolutionStrategy {
-        eachPlugin {
-            if (requested.id.toString() == 'org.spongepowered.mixin') {
-                useModule("org.spongepowered:mixingradle:${requested.version}")
-            }
-        }
-    }
 }
 
 rootProject.name = 'defaultresources'
-include("Common", "Forge", "Quilt")
+include("Common", "NeoForge", "FabriQuilt")
