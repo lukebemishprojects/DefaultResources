@@ -3,15 +3,15 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-package dev.lukebemish.defaultresources.impl.fabriquilt.fabric;
+package dev.lukebemish.defaultresources.impl.fabriquilt;
 
 import net.fabricmc.api.ClientModInitializer;
 import net.minecraft.server.packs.PackType;
 
 @SuppressWarnings("deprecation")
-public class DefaultResourcesFabricClient implements ClientModInitializer {
+public class DefaultResourcesFabriQuiltClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
-        DefaultResourcesFabric.addPackResources(PackType.CLIENT_RESOURCES);
+        DefaultResourcesFabriQuilt.addPackResources(PackType.CLIENT_RESOURCES);
     }
 }

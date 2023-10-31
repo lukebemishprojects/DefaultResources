@@ -15,8 +15,8 @@ import java.io.InputStream;
 
 @Mixin(Resource.class)
 public interface ResourceAccessor {
-    @Accessor
-    IoSupplier<InputStream> getStreamSupplier();
-    @Accessor
-    IoSupplier<ResourceMetadata> getMetadataSupplier();
+    @Accessor(value = "streamSupplier")
+    IoSupplier<InputStream> defaultresources_getStreamSupplier();
+    @Accessor(value = "metadataSupplier")
+    IoSupplier<ResourceMetadata> defaultresources_getMetadataSupplier();
 }

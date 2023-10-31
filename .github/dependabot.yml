@@ -9,13 +9,10 @@ registries:
   quiltmc:
     type: maven-repository
     url: https://maven.quiltmc.org/repository/release/
-  sponge:
-    type: maven-repository
-    url: https://repo.spongepowered.org/repository/maven-public/
   parchment:
     type: maven-repository
     url: https://maven.parchmentmc.org/
-  forge:
+  neoforge:
     type: maven-repository
     url: https://maven.neoforged.net/
 updates:
@@ -25,9 +22,8 @@ updates:
       - maven-central
       - fabricmc
       - quiltmc
-      - sponge
       - parchment
-      - forge
+      - neoforge
     schedule:
       interval: "weekly"
     ignore:
@@ -35,7 +31,7 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "com.mojang:minecraft"
         update-types: ["version-update:semver-major"]
-      - dependency-name: "*minecraftforge*"
+      - dependency-name: "*neoforge*"
         update-types: ["version-update:semver-major"]
       - dependency-name: "org.quiltmc*"
         update-types: ["version-update:semver-major"]

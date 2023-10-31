@@ -88,10 +88,10 @@ public class WrappingResourceManager implements GlobalResourceManager {
     }
 
     private Resource wrapResource(Resource resource) {
-        if (((ResourceAccessor) resource).getMetadataSupplier() == ResourceMetadata.EMPTY_SUPPLIER) {
-            return new Resource(wrapResources(resource.source()), ((ResourceAccessor) resource).getStreamSupplier());
+        if (((ResourceAccessor) resource).defaultresources_getMetadataSupplier() == ResourceMetadata.EMPTY_SUPPLIER) {
+            return new Resource(wrapResources(resource.source()), ((ResourceAccessor) resource).defaultresources_getStreamSupplier());
         }
-        return new Resource(wrapResources(resource.source()), ((ResourceAccessor) resource).getStreamSupplier(), ((ResourceAccessor) resource).getMetadataSupplier());
+        return new Resource(wrapResources(resource.source()), ((ResourceAccessor) resource).defaultresources_getStreamSupplier(), ((ResourceAccessor) resource).defaultresources_getMetadataSupplier());
     }
 
     private ResourceLocation wrapLocation(ResourceLocation location) {

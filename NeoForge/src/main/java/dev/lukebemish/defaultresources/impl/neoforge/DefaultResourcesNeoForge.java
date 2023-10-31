@@ -11,20 +11,20 @@ import dev.lukebemish.defaultresources.impl.Services;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.packs.PackType;
-import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.flag.FeatureFlagSet;
-import net.minecraftforge.event.AddPackFindersEvent;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.resource.DelegatingPackResources;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.neoforge.event.AddPackFindersEvent;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Mod(DefaultResources.MOD_ID)
 public class DefaultResourcesNeoForge {
@@ -42,45 +42,34 @@ public class DefaultResourcesNeoForge {
                 if (!Files.exists(Services.PLATFORM.getGlobalFolder()))
                     Files.createDirectories(Services.PLATFORM.getGlobalFolder());
                 List<Pair<String, Pack.ResourcesSupplier>> packs = DefaultResources.getPackResources(event.getPackType());
-                if (event.getPackType() == PackType.CLIENT_RESOURCES) {
-                    Pack.Info info = new Pack.Info(Component.literal("Global Resources"),
-                        SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA),
-                        SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
-                        FeatureFlagSet.of(),
-                        true);
-                    Pack pack = Pack.create(DefaultResources.MOD_ID, Component.literal("Global Resources"), true, s -> new DelegatingPackResources(
-                            DefaultResources.MOD_ID + "_global",
-                            false,
-                            new PackMetadataSection(
-                                Component.literal("Global Resources"),
-                                SharedConstants.getCurrentVersion().getPackVersion(event.getPackType())),
-                            packs.stream().map(p -> p.getSecond().open(s)).toList()),
-                        info,
-                        PackType.CLIENT_RESOURCES, Pack.Position.TOP, true, PackSource.DEFAULT);
-                    packConsumer.accept(pack);
-                } else {
-                    packs.forEach(packResources -> {
-                        Pack.Info info = new Pack.Info(Component.literal("Global Resources"),
-                            SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA),
-                            SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
-                            FeatureFlagSet.of(),
-                            true);
-
-                        Pack pack = Pack.create(DefaultResources.MOD_ID + ":" + packResources.getFirst(),
-                            Component.literal("Global Resources"),
-                            true,
-                            packResources.getSecond(),
-                            info,
-                            PackType.SERVER_DATA,
-                            Pack.Position.TOP,
-                            true,
-                            PackSource.DEFAULT);
-                        packConsumer.accept(pack);
-                    });
-                }
+                createPackStream(event.getPackType(), packs).forEach(packConsumer);
             } catch (IOException e) {
                 DefaultResources.LOGGER.error("Couldn't inject resources!");
             }
+        });
+    }
+
+    private static Stream<Pack> createPackStream(PackType packType, List<Pair<String, Pack.ResourcesSupplier>> packs) {
+        return packs.stream().map(pair -> {
+            Pack.Info info = new Pack.Info(
+                Component.literal("Global Resources - "+pair.getFirst()),
+                SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA),
+                SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
+                PackCompatibility.COMPATIBLE,
+                FeatureFlagSet.of(),
+                List.of(),
+                true
+            );
+            return Pack.create(
+                DefaultResources.MOD_ID + ":" + pair.getFirst(),
+                Component.literal("Global Resources"),
+                true,
+                pair.getSecond(),
+                info,
+                Pack.Position.TOP,
+                true,
+                PackSource.DEFAULT
+            );
         });
     }
 }

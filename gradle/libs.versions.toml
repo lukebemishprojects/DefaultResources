@@ -1,35 +1,35 @@
 [versions]
-minecraft = "1.20.1"
+minecraft = "1.20.2"
 parchment_minecraft = "1.20.1"
 parchment_mappings = "2023.08.20"
 
-neoforge = "1.20.1-47.1.75"
-mixin = "0.8.5"
+neoforge = "20.2.8-beta"
 
-quilt_loader = "0.20.1"
-qfapi = "7.1.2+0.87.0-1.20.1"
+fabric_loader = "0.14.24"
+fabric_api = "0.90.4+1.20.2"
 
 mdg_plugin = "1.4.1"
 mdg_dsl = "1.5.1"
 autoservice = "1.1.1"
 
-quilt_loom = "1.2.3"
+fabric_loom = "1.4.4"
 quilt_licenser = "2.0.1"
 
-neogradle = "6.0.18"
-librarian = "1.2.0"
-mixingradle = "0.7.33"
+neogradle = "7.0.8"
+#librarian = "1.2.0"
 
 jetbrains_annotations = "24.0.1"
 jspecify = "0.3.0"
 
+managedversioning = "1.0.0"
+
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
 
-quilt_loader = { module = "org.quiltmc:quilt-loader", version.ref = "quilt_loader" }
-qfapi = { module = "org.quiltmc.quilted-fabric-api:quilted-fabric-api", version.ref = "qfapi" }
+fabric_loader = { module = "net.fabricmc:fabric-loader", version.ref = "fabric_loader" }
+fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fabric_api" }
 
-neoforge = { module = "net.neoforged:forge", version.ref = "neoforge" }
+neoforge = { module = "net.neoforged:neoforge", version.ref = "neoforge" }
 
 jetbrains_annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations" }
 jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
@@ -38,9 +38,10 @@ autoservice = { module = "com.google.auto.service:auto-service", version.ref = "
 
 [plugins]
 
+managedversioning = { id = "dev.lukebemish.managedversioning", version.ref = "managedversioning" }
 mdg_plugin = { id = "org.groovymc.modsdotgroovy", version.ref = "mdg_plugin" }
-quilt_loom = { id = "org.quiltmc.loom", version.ref = "quilt_loom" }
+fabric_loom = { id = "fabric-loom", version.ref = "fabric_loom" }
 quilt_licenser = { id = "org.quiltmc.gradle.licenser", version.ref = "quilt_licenser" }
-neogradle = { id = "net.neoforged.gradle", version.ref = "neogradle" }
-librarian = { id = "org.parchmentmc.librarian.forgegradle", version.ref = "librarian" }
-mixingradle = {id = "org.spongepowered.mixin", version.ref = "mixingradle" }
+neogradle_userdev = { id = "net.neoforged.gradle.userdev", version.ref = "neogradle" }
+neogradle_mixin = { id = "net.neoforged.gradle.mixin", version.ref = "neogradle" }
+#librarian = { id = "org.parchmentmc.librarian.forgegradle", version.ref = "librarian" }

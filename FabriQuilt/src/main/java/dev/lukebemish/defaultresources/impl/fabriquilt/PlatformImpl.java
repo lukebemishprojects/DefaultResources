@@ -13,8 +13,10 @@ import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.Platform;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,7 +25,6 @@ import java.util.*;
 
 @AutoService(Platform.class)
 public class PlatformImpl implements Platform {
-    @SuppressWarnings("deprecation")
     @Override
     public Path getGlobalFolder() {
         return FabricLoader.getInstance().getGameDir().resolve("globalresources");
@@ -37,7 +38,7 @@ public class PlatformImpl implements Platform {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
-        FabriquiltPlatform.getInstance().forAllMods((modID, path) -> {
+        DefaultResourcesFabriQuilt.forAllMods((modID, path) -> {
             if (!modID.equals("minecraft")) {
                 DefaultResources.forMod(path::resolve, modID);
             }
@@ -47,15 +48,24 @@ public class PlatformImpl implements Platform {
     @Override
     public Collection<Pair<String, Pack.ResourcesSupplier>> getJarProviders(PackType type) {
         List<Pair<String, Pack.ResourcesSupplier>> providers = new ArrayList<>();
-        FabriquiltPlatform.getInstance().forAllMods((modID, path) -> {
+        DefaultResourcesFabriQuilt.forAllMods((modID, path) -> {
             if (!modID.equals("minecraft")) {
-                providers.add(new Pair<>(modID, s -> new AutoMetadataPathPackResources(s, "global", path, type)));
+                providers.add(new Pair<>(modID, new Pack.ResourcesSupplier() {
+                    @Override
+                    public @NonNull PackResources openPrimary(@NonNull String s) {
+                        return new AutoMetadataPathPackResources(s, "global", path, type);
+                    }
+
+                    @Override
+                    public @NonNull PackResources openFull(@NonNull String s, Pack.@NonNull Info info) {
+                        return new AutoMetadataPathPackResources(s, "global", path, type);
+                    }
+                }));
             }
         });
         return providers;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public Path getConfigDir() {
         return FabricLoader.getInstance().getConfigDir();
@@ -64,7 +74,7 @@ public class PlatformImpl implements Platform {
     @Override
     public Map<String, Path> getExistingModdedPaths(String relative) {
         Map<String, Path> out = new HashMap<>();
-        FabriquiltPlatform.getInstance().forAllMods((modID, path) -> {
+        DefaultResourcesFabriQuilt.forAllMods((modID, path) -> {
             if (!modID.equals("minecraft")) {
                 Path p = path.resolve(relative);
                 if (Files.exists(p)) {
@@ -75,7 +85,6 @@ public class PlatformImpl implements Platform {
         return out;
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public boolean isClient() {
         return FabricLoader.getInstance().getEnvironmentType() == EnvType.CLIENT;

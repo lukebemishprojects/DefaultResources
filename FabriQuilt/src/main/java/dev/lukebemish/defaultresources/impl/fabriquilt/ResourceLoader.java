@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
-package dev.lukebemish.defaultresources.impl.fabriquilt.fabric;
+package dev.lukebemish.defaultresources.impl.fabriquilt;
 
 import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;

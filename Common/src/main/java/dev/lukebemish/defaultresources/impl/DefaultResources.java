@@ -112,16 +112,30 @@ public class DefaultResources {
         Config.INSTANCE.get().save();
     }
 
+    public static Pack.ResourcesSupplier wrap(Function<String, PackResources> function) {
+        return new Pack.ResourcesSupplier() {
+            @Override
+            public @NonNull PackResources openPrimary(String string) {
+                return function.apply(string);
+            }
+
+            @Override
+            public @NonNull PackResources openFull(String string, Pack.Info info) {
+                return function.apply(string);
+            }
+        };
+    }
+
     @NonNull
     public static List<Pair<String, Pack.ResourcesSupplier>> getPackResources(PackType type) {
         List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
             for (var file : files.toList()) {
                 if (Files.isDirectory(file)) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, "", file, type);
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, "", file, type));
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 } else if (file.getFileName().toString().endsWith(".zip")) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, "", file, type);
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, "", file, type));
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 }
             }
@@ -131,7 +145,7 @@ public class DefaultResources {
         QUEUED_RESOURCES.forEach((s, biFunction) -> {
             Supplier<PackResources> resources = biFunction.apply(s, type);
             if (resources == null) return;
-            packs.add(new Pair<>(s, str -> resources.get()));
+            packs.add(new Pair<>(s, wrap(str -> resources.get())));
         });
         return packs;
     }
@@ -142,10 +156,10 @@ public class DefaultResources {
         try (var files = Files.list(Services.PLATFORM.getGlobalFolder())) {
             for (var file : files.toList()) {
                 if (Files.isDirectory(file)) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type);
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type));
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 } else if (file.getFileName().toString().endsWith(".zip")) {
-                    Pack.ResourcesSupplier packResources = s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type);
+                    Pack.ResourcesSupplier packResources = wrap(s -> new AutoMetadataPathPackResources(s, GLOBAL_PREFIX, file, type));
                     packs.add(new Pair<>(file.getFileName().toString(), packResources));
                 }
             }
@@ -155,7 +169,7 @@ public class DefaultResources {
         QUEUED_STATIC_RESOURCES.forEach((s, biFunction) -> {
             Supplier<PackResources> resources = biFunction.apply(s, type);
             if (resources == null) return;
-            packs.add(new Pair<>(s, str -> resources.get()));
+            packs.add(new Pair<>(s, wrap(str -> resources.get())));
         });
         return packs;
     }

@@ -32,7 +32,7 @@ public class CombinedResourceManager implements GlobalResourceManager {
 
     public CombinedResourceManager(PackType type, List<Pair<String, Pack.ResourcesSupplier>> resources) {
         this.type = type;
-        this.resources = resources.stream().sorted(Comparator.comparing(Pair::getFirst)).map(p -> p.getSecond().open(p.getFirst())).toList();
+        this.resources = resources.stream().sorted(Comparator.comparing(Pair::getFirst)).map(p -> p.getSecond().openPrimary(p.getFirst())).toList();
         Map<String, List<PackResources>> namespaceBuilder = new HashMap<>();
         for (var resource : this.resources) {
             for (var namespace : resource.getNamespaces(type)) {

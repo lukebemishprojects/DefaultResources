@@ -1,74 +1,63 @@
 plugins {
-    alias libs.plugins.neogradle
-    alias libs.plugins.librarian
-    alias libs.plugins.mixingradle
+    alias libs.plugins.neogradle.userdev
+    alias libs.plugins.neogradle.mixin
+    //alias libs.plugins.librarian
 }
 
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
+runs {
+    configureEach {
+        systemProperty 'forge.logging.console.level', 'debug'
+        modSource project.sourceSets.main
+        //modSource project(':Common').sourceSets.main
+    }
 
-minecraft {
-    mappings channel: 'parchment', version: "${libs.versions.parchment.minecraft.get()}-${libs.versions.parchment.mappings.get()}-${libs.versions.minecraft.get()}"
+    client {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+    }
 
-    runs {
-        client {
-            workingDirectory project.file('run')
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'Client'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            mods {
-                modClientRun {
-                    source sourceSets.main
-                    source project(":Common").sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('runserver')
-            ideaModule "${rootProject.name}.${project.name}.main"
-            taskName 'Server'
-            property 'mixin.env.remapRefMap', 'true'
-            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
-            mods {
-                modServerRun {
-                    source sourceSets.main
-                    source project(":Common").sourceSets.main
-                }
-            }
-        }
+    server {
+        systemProperty 'forge.enabledGameTestNamespaces', project.mod_id
+        programArgument '--nogui'
     }
 }
 
 sourceSets.main.resources.srcDir 'src/generated/resources'
 
-configurations {
-    testCompileOnly.extendsFrom(compileOnly)
-}
-
 dependencies {
-    minecraft libs.neoforge
+    implementation libs.neoforge
+
     compileOnly project(":Common")
 
     compileOnly libs.autoservice
     annotationProcessor libs.autoservice
-
-    annotationProcessor "org.spongepowered:mixin:${libs.versions.mixin.get()}:processor"
 }
 
 mixin {
-    add project(":Common").sourceSets.main, 'defaultresources.refmap.json'
-    config 'mixin.defaultresources.json'
+    //add project(":Common").sourceSets.main, 'defaultresources.refmap.json'
+    //config 'mixin.defaultresources.json'
+    configs.add 'mixin.defaultresources.json'
 }
 
-tasks.withType(JavaCompile).configureEach {
+tasks.named('compileJava',JavaCompile).configure {
     source(project(":Common").sourceSets.main.allSource)
 }
 
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+
 processResources {
     from project(":Common").sourceSets.main.resources
+
+    doLast {
+        fileTree(dir: outputs.files.asPath, include: "mixin.*.json").each { File file ->
+            def obj = new JsonSlurper().parse(file)
+            if (obj.refmap) {
+                obj.remove('refmap')
+            }
+            file.text = JsonOutput.toJson(obj)
+        }
+    }
 }
 
 sourcesJar {
@@ -79,17 +68,11 @@ javadocJar {
     from project(":Common").sourceSets.main.allJava
 }
 
-jar.finalizedBy('reobfJar')
-
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
-            artifact sourcesJar
-            artifact javadocJar
+            from components.java
             artifactId base.archivesName.get()
         }
-    }
-    repositories {
     }
 }

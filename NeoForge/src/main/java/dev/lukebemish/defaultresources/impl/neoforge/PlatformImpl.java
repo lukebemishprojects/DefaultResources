@@ -11,12 +11,14 @@ import dev.lukebemish.defaultresources.impl.AutoMetadataPathPackResources;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.Platform;
+import net.minecraft.server.packs.PackResources;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.fml.loading.FMLLoader;
-import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforgespi.language.IModInfo;
+import org.jspecify.annotations.NonNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -55,7 +57,17 @@ public class PlatformImpl implements Platform {
             .filter(PlatformImpl::isExtractable)
             .forEach(mod -> {
                 Path packPath = mod.getOwningFile().getFile().getSecureJar().getPath(String.join("/"));
-                providers.add(new Pair<>(mod.getModId(), s -> new AutoMetadataPathPackResources(s, "global", packPath, type)));
+                providers.add(new Pair<>(mod.getModId(), new Pack.ResourcesSupplier() {
+                    @Override
+                    public @NonNull PackResources openPrimary(@NonNull String s) {
+                        return new AutoMetadataPathPackResources(s, "global", packPath, type);
+                    }
+
+                    @Override
+                    public @NonNull PackResources openFull(@NonNull String s, Pack.@NonNull Info info) {
+                        return new AutoMetadataPathPackResources(s, "global", packPath, type);
+                    }
+                }));
             });
         return providers;
     }
