@@ -18,6 +18,9 @@ jobs:
                 path: |
                     .gradle/quilt-loom-cache
                     .gradle/loom-cache
+                    **/.gradle/caches
+                    **/.gradle/repositories
+                    **/build/neoForm
                 key: ${{ runner.os }}-gradle-${{ hashFiles('**/libs.versions.*', '**/*.gradle*', '**/gradle-wrapper.properties') }}
                 restore-keys: ${{ runner.os }}-gradle-
             - uses: gradle/gradle-build-action@v2
