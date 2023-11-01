@@ -5,7 +5,7 @@
 
 ModsDotGroovy.make {
     modLoader = 'javafml'
-    loaderVersion = '[40,)'
+    loaderVersion = '[1,)'
     issueTrackerUrl = 'https://github.com/lukebemishprojects/DefaultResources/issues'
     license = 'LGPL-3.0-or-later'
 
