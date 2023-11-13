@@ -15,7 +15,7 @@ autoservice = "1.1.1"
 fabric_loom = "1.4.4"
 quilt_licenser = "2.0.1"
 
-neogradle = "7.0.8"
+neogradle = "7.0.43"
 #librarian = "1.2.0"
 
 jetbrains_annotations = "24.0.1"
