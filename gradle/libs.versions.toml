@@ -18,7 +18,7 @@ quilt_licenser = "2.0.1"
 neogradle = "7.0.8"
 #librarian = "1.2.0"
 
-jetbrains_annotations = "24.0.1"
+jetbrains_annotations = "24.1.0"
 jspecify = "0.3.0"
 
 managedversioning = "1.0.0"
