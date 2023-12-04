@@ -58,6 +58,11 @@ public class PlatformImpl implements IPlatform {
     }
 
     @Override
+    public Path getResourcePackDir() {
+        return QuiltLoader.getGameDir().resolve("resourcepacks");
+    }
+
+    @Override
     public Path getConfigDir() {
         return QuiltLoader.getConfigDir();
     }

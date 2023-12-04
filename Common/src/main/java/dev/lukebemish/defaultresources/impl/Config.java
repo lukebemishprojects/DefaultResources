@@ -7,6 +7,7 @@ package dev.lukebemish.defaultresources.impl;
 
 import com.google.common.base.Suppliers;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
@@ -22,16 +23,18 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.zip.ZipFile;
 
-public record Config(HashMap<String, ExtractionState> extract) {
+public record Config(HashMap<String, ExtractionState> extract, HashMap<String, Boolean> fromResourcePacks) {
     public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
-        Codec.unboundedMap(Codec.STRING, StringRepresentable.fromEnum(ExtractionState::values)).xmap(HashMap::new, Function.identity()).fieldOf("extract").forGetter(Config::extract)
+        Codec.unboundedMap(Codec.STRING, StringRepresentable.fromEnum(ExtractionState::values)).xmap(HashMap::new, Function.identity()).fieldOf("extract").forGetter(Config::extract),
+        Codec.unboundedMap(Codec.STRING, Codec.BOOL).fieldOf("from_resource_packs").xmap(HashMap::new, Function.identity()).forGetter(Config::fromResourcePacks)
     ).apply(i, Config::new));
 
     public static final Supplier<Config> INSTANCE = Suppliers.memoize(Config::readFromConfig);
 
     private static Config getDefault() {
-        return new Config(new HashMap<>());
+        return new Config(new HashMap<>(), new HashMap<>());
     }
 
     private static Config readFromConfig() {
@@ -64,7 +67,32 @@ public record Config(HashMap<String, ExtractionState> extract) {
                     DefaultResources.META_FILE_PATH, modId, e);
             }
         });
-        config = new Config(map);
+
+        var resourcePacks = new HashMap<String, Boolean>();
+        var originalResourcePacks = config.fromResourcePacks();
+        Path resourcePacksPath = Services.PLATFORM.getResourcePackDir();
+        try (var paths = Files.list(resourcePacksPath)) {
+            paths.forEach(path -> {
+                String fileName = path.getFileName().toString();
+                boolean detect;
+                if (fileName.endsWith(".zip") || fileName.endsWith(".jar")) {
+                    detect = checkZipForMeta(path);
+                } else if (Files.isDirectory(path)) {
+                    detect = checkPathForMeta(path);
+                } else {
+                    return;
+                }
+                if (detect) {
+                    resourcePacks.put(fileName, originalResourcePacks.getOrDefault(fileName, true));
+                }
+            });
+        } catch (IOException e) {
+            if (Files.exists(resourcePacksPath)) {
+                DefaultResources.LOGGER.warn("Could not read resource packs from {}!", resourcePacksPath, e);
+            }
+        }
+
+        config = new Config(map, resourcePacks);
 
         try {
             writeConfig(configPath, config);
@@ -73,6 +101,36 @@ public record Config(HashMap<String, ExtractionState> extract) {
         }
 
         return config;
+    }
+
+    private static boolean checkZipForMeta(Path path) {
+        try (var zipFile = new ZipFile(path.toFile());
+             var reader = zipFile.getInputStream(zipFile.getEntry("pack.mcmeta"))) {
+            if (reader != null) {
+                JsonObject object = DefaultResources.GSON.fromJson(new InputStreamReader(reader), JsonObject.class);
+                JsonElement meta = object.get(DefaultResources.MOD_ID);
+                var result = DefaultResourcesMetadataSection.CODEC.parse(JsonOps.INSTANCE, meta);
+                return result.result().isPresent() && result.result().get().detect();
+            }
+        } catch (Exception e) {
+            DefaultResources.LOGGER.error("Could not read {}, which looks like a zip file, for resource pack detection; ignoring.", path.getFileName(), e);
+        }
+        return false;
+    }
+
+    private static boolean checkPathForMeta(Path path) {
+        var metaFile = path.resolve("pack.mcmeta");
+        if (Files.exists(metaFile)) {
+            try (var reader = Files.newBufferedReader(metaFile)) {
+                JsonObject object = DefaultResources.GSON.fromJson(reader, JsonObject.class);
+                JsonElement meta = object.get(DefaultResources.MOD_ID);
+                var result = DefaultResourcesMetadataSection.CODEC.parse(JsonOps.INSTANCE, meta);
+                return result.result().isPresent() && result.result().get().detect();
+            } catch (Exception e) {
+                DefaultResources.LOGGER.error("Could not read {} for resource pack detection; ignoring.", path.getFileName(), e);
+            }
+        }
+        return false;
     }
 
     private static void writeConfig(Path path, Config config) throws IOException {

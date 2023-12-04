@@ -58,6 +58,16 @@ public class DefaultResources {
         } catch (IOException ignored) {
         }
         providers.addAll(Services.PLATFORM.getJarProviders());
+        Config.INSTANCE.get().fromResourcePacks().forEach((name, enabled) -> {
+            if (enabled) {
+                Path path = Services.PLATFORM.getResourcePackDir().resolve(name);
+                if (Files.isDirectory(path)) {
+                    providers.add(new PathResourceProvider(path));
+                } else if (Files.isRegularFile(path)) {
+                    providers.add(new ZipResourceProvider(path));
+                }
+            }
+        });
         return new GroupedResourceProvider(providers);
     }
 

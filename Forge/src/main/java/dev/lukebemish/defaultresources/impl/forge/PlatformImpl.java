@@ -56,6 +56,11 @@ public class PlatformImpl implements IPlatform {
     }
 
     @Override
+    public Path getResourcePackDir() {
+        return FMLPaths.GAMEDIR.get().resolve("resourcepacks");
+    }
+
+    @Override
     public Path getConfigDir() {
         return FMLPaths.CONFIGDIR.get();
     }
