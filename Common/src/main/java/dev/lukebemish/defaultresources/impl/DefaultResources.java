@@ -65,7 +65,10 @@ public class DefaultResources {
                     providers.add(new PathResourceProvider(path));
                 } else if (Files.isRegularFile(path)) {
                     providers.add(new ZipResourceProvider(path));
+                } else {
+                    return;
                 }
+                DefaultResources.LOGGER.info("Added resource pack \"{}\" to global resource providers", name);
             }
         });
         return new GroupedResourceProvider(providers);
