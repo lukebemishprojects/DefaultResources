@@ -110,6 +110,9 @@ public record Config(HashMap<String, ExtractionState> extract, HashMap<String, B
                 JsonObject object = DefaultResources.GSON.fromJson(new InputStreamReader(reader), JsonObject.class);
                 JsonElement meta = object.get(DefaultResources.MOD_ID);
                 var result = DefaultResourcesMetadataSection.CODEC.parse(JsonOps.INSTANCE, meta);
+                if (result.error().isPresent()) {
+                    DefaultResources.LOGGER.error("Could not read metadata of {} for resource pack detection; ignoring: {}", path.getFileName(), result.error().get());
+                }
                 return result.result().isPresent() && result.result().get().detect();
             }
         } catch (Exception e) {
@@ -125,6 +128,9 @@ public record Config(HashMap<String, ExtractionState> extract, HashMap<String, B
                 JsonObject object = DefaultResources.GSON.fromJson(reader, JsonObject.class);
                 JsonElement meta = object.get(DefaultResources.MOD_ID);
                 var result = DefaultResourcesMetadataSection.CODEC.parse(JsonOps.INSTANCE, meta);
+                if (result.error().isPresent()) {
+                    DefaultResources.LOGGER.error("Could not read metadata of {} for resource pack detection; ignoring: {}", path.getFileName(), result.error().get());
+                }
                 return result.result().isPresent() && result.result().get().detect();
             } catch (Exception e) {
                 DefaultResources.LOGGER.error("Could not read {} for resource pack detection; ignoring.", path.getFileName(), e);
