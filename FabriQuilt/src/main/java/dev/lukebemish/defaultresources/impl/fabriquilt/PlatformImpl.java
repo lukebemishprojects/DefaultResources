@@ -72,6 +72,11 @@ public class PlatformImpl implements Platform {
     }
 
     @Override
+    public Path getResourcePackDir() {
+        return FabricLoader.getInstance().getGameDir().resolve("resourcepacks");
+    }
+
+    @Override
     public Map<String, Path> getExistingModdedPaths(String relative) {
         Map<String, Path> out = new HashMap<>();
         DefaultResourcesFabriQuilt.forAllMods((modID, path) -> {

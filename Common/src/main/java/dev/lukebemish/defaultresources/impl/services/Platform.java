@@ -21,6 +21,7 @@ public interface Platform {
     Collection<Pair<String, Pack.ResourcesSupplier>> getJarProviders(PackType type);
 
     Path getConfigDir();
+    Path getResourcePackDir();
 
     Map<String, Path> getExistingModdedPaths(String relative);
 

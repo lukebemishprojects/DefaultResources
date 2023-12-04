@@ -19,3 +19,16 @@ resources are first extracted. All these fields are optional, but if `extracts_b
 must be provided.
 * `resources_path` - the path to default resources within the mod jar. Optional; defaults to `defaultresources`
 * `zip` - whether, when extracted, the resources should be zipped. Optional; defaults to true.
+
+## Detection from `resourcepacks`
+
+DefaultResources will automatically detect resource packs that include "global" resources and attempt to configure them.
+To mark that your resource pack should be detected, add the following to the `pack.mcmeta`:
+```json
+{
+  "defaultresources": {
+    "detect": true
+  }
+}
+```
+Which such resource packs are loaded as global resources can be configured in the DefaultResources config.

@@ -32,7 +32,7 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     private static final Logger LOGGER = LogUtils.getLogger();
 
     private final String name;
-    private final Path path;
+    protected final Path path;
     private final PackType packType;
 
     public AutoMetadataPathPackResources(String s, String prefix, Path path, PackType packType) {
@@ -40,6 +40,10 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
         this.name = prefix+packType.getDirectory();
         this.path = path;
         this.packType = packType;
+    }
+
+    protected String getPackFolderName() {
+        return name;
     }
 
     @Nullable
@@ -51,7 +55,7 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     @Nullable
     @Override
     public IoSupplier<InputStream> getResource(PackType packType, ResourceLocation location) {
-        Path path = this.path.resolve(name).resolve(location.getNamespace());
+        Path path = this.path.resolve(getPackFolderName()).resolve(location.getNamespace());
         if (!Files.isDirectory(path)) {
             return null;
         }
@@ -61,7 +65,7 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     @Override
     public void listResources(PackType packType, String namespace, String path, ResourceOutput resourceOutput) {
         FileUtil.decomposePath(path).get().ifLeft((list) -> {
-            Path namespacePath = this.path.resolve(name).resolve(namespace);
+            Path namespacePath = this.path.resolve(getPackFolderName()).resolve(namespace);
             if (!Files.isDirectory(namespacePath)) {
                 return;
             }
@@ -72,7 +76,7 @@ public class AutoMetadataPathPackResources extends AbstractPackResources {
     @Override
     public @NonNull Set<String> getNamespaces(PackType type) {
         Set<String> set = new HashSet<>();
-        Path path = this.path.resolve(name);
+        Path path = this.path.resolve(getPackFolderName());
 
         if (!Files.isDirectory(path)) {
             return Set.of();

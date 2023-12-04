@@ -166,10 +166,29 @@ public class DefaultResources {
         } catch (IOException ignored) {
 
         }
+        packs.addAll(getDetectedPacks(type));
         QUEUED_STATIC_RESOURCES.forEach((s, biFunction) -> {
             Supplier<PackResources> resources = biFunction.apply(s, type);
             if (resources == null) return;
             packs.add(new Pair<>(s, wrap(str -> resources.get())));
+        });
+        return packs;
+    }
+
+    private static List<Pair<String, Pack.ResourcesSupplier>> getDetectedPacks(PackType type) {
+        List<Pair<String, Pack.ResourcesSupplier>> packs = new ArrayList<>();
+        Config.INSTANCE.get().fromResourcePacks().forEach((name, enabled) -> {
+            if (enabled) {
+                Path path = Services.PLATFORM.getResourcePackDir().resolve(name);
+                if (Files.isDirectory(path)) {
+                    packs.add(Pair.of(name, wrap(n -> new AutoMetadataPathPackResources(n, GLOBAL_PREFIX, path, type))));
+                } else if (Files.isRegularFile(path)) {
+                    packs.add(Pair.of(name, wrap(n -> new AutoMetadataFilePackResources(n, GLOBAL_PREFIX, path, type))));
+                } else {
+                    return;
+                }
+                DefaultResources.LOGGER.info("Added resource pack \"{}\" to global {} resource providers", name, type.getDirectory());
+            }
         });
         return packs;
     }

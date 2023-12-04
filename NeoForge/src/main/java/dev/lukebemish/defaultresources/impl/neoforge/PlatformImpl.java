@@ -78,6 +78,11 @@ public class PlatformImpl implements Platform {
     }
 
     @Override
+    public Path getResourcePackDir() {
+        return FMLPaths.GAMEDIR.get().resolve("resourcepacks");
+    }
+
+    @Override
     public Map<String, Path> getExistingModdedPaths(String relative) {
         return FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
             .filter(PlatformImpl::isExtractable)
