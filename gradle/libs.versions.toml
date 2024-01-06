@@ -1,27 +1,24 @@
 [versions]
-minecraft = "1.20.2"
-parchment_minecraft = "1.20.1"
-parchment_mappings = "2023.08.20"
+minecraft = "1.20.4"
+parchment_minecraft = "1.20.2"
+parchment_mappings = "2023.12.10"
 
-neoforge = "20.2.8-beta"
+neoforge = "20.4.80-beta"
 
-fabric_loader = "0.14.24"
-fabric_api = "0.90.4+1.20.2"
+fabric_loader = "0.15.3"
+fabric_api = "0.92.1+1.20.4"
 
-mdg_plugin = "1.4.1"
+mdg_plugin = "1.4.3"
 mdg_dsl = "1.5.1"
 autoservice = "1.1.1"
 
-fabric_loom = "1.4.4"
+architectury_loom = "1.4.373"
 quilt_licenser = "2.0.1"
-
-neogradle = "7.0.8"
-#librarian = "1.2.0"
 
 jetbrains_annotations = "24.0.1"
 jspecify = "0.3.0"
 
-managedversioning = "1.0.0"
+managedversioning = "1.2.3"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -40,8 +37,5 @@ autoservice = { module = "com.google.auto.service:auto-service", version.ref = "
 
 managedversioning = { id = "dev.lukebemish.managedversioning", version.ref = "managedversioning" }
 mdg_plugin = { id = "org.groovymc.modsdotgroovy", version.ref = "mdg_plugin" }
-fabric_loom = { id = "fabric-loom", version.ref = "fabric_loom" }
 quilt_licenser = { id = "org.quiltmc.gradle.licenser", version.ref = "quilt_licenser" }
-neogradle_userdev = { id = "net.neoforged.gradle.userdev", version.ref = "neogradle" }
-neogradle_mixin = { id = "net.neoforged.gradle.mixin", version.ref = "neogradle" }
-#librarian = { id = "org.parchmentmc.librarian.forgegradle", version.ref = "librarian" }
+architectury_loom = { id = "dev.architectury.loom", version.ref = "architectury_loom" }

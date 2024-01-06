@@ -1,3 +1,5 @@
+import modsdotgroovy.Dependency
+
 /*
  * Copyright (C) 2023 Luke Bemish, and contributors
  * SPDX-License-Identifier: LGPL-3.0-or-later
@@ -40,11 +42,33 @@ ModsDotGroovy.make {
                 }
             }
         }
+
+        dependencies = dependencies.collect {dep ->
+            new Dependency() {
+                @Override
+                Map asForgeMap() {
+                    def map = super.asForgeMap()
+                    map.remove('mandatory')
+                    map.put('type', this.mandatory ? 'required' : 'optional')
+                }
+            }.tap {
+                it.modId = dep.modId
+                it.mandatory = dep.mandatory
+                it.versionRange = dep.versionRange
+                it.ordering = dep.ordering
+                it.side = dep.side
+            }
+        }
     }
     onFabric {
         mixin = [
             'mixin.defaultresources.fabriquilt.json',
             'mixin.defaultresources.json'
+        ]
+    }
+    onForge {
+        mixins = [
+            ['config':'mixin.defaultresources.json']
         ]
     }
 }

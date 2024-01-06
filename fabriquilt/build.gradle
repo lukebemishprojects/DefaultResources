@@ -1,0 +1,37 @@
+plugins {
+    id 'convention.consumer'
+    alias libs.plugins.architectury.loom
+}
+
+dependencies {
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.minecraft.get()}:${libs.versions.parchment.mappings.get()}@zip")
+    }
+    minecraft libs.minecraft
+    modImplementation libs.fabric.loader
+    modImplementation libs.fabric.api
+
+    compileOnly libs.autoservice
+    annotationProcessor libs.autoservice
+}
+
+loom {
+    mixin {
+        defaultRefmapName = "defaultresources.refmap.json"
+    }
+    runs {
+        client {
+            client()
+            setConfigName("Fabric Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("Fabric Server")
+            ideConfigGenerated(true)
+            runDir("runserver")
+        }
+    }
+}

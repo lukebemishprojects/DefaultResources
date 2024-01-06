@@ -1,17 +1,65 @@
 plugins {
     alias libs.plugins.quilt.licenser apply false
     alias libs.plugins.mdg.plugin
-    alias libs.plugins.fabric.loom apply false
     alias libs.plugins.managedversioning
+    alias libs.plugins.architectury.loom apply false
 }
 
 managedVersioning {
     versionFile.set rootProject.file('version.properties')
     metadataVersion.set libs.versions.minecraft
-    if (System.getenv('PR_NUMBER')) {
-        suffix.set("pr${System.getenv('PR_NUMBER')}")
-    } else if (System.getenv('SNAPSHOT_MAVEN_URL')) {
-        suffix.set('SNAPSHOT')
+    versionPRs()
+    versionSnapshots()
+
+    gitHubActions {
+        snapshot {
+            prettyName.set 'Snapshot'
+            workflowDispatch.set(true)
+            onBranches.add '1.*'
+            gradleJob {
+                name.set 'build'
+                gradlew 'Build', 'checkLicenses', 'build'
+                gradlew 'Publish', 'publish'
+                mavenSnapshot('github')
+            }
+        }
+        release {
+            prettyName.set 'Release'
+            workflowDispatch.set(true)
+            gradleJob {
+                name.set 'build'
+                step {
+                    setupGitUser()
+                }
+                readOnly.set false
+                gradlew 'Tag Release', 'tagRelease'
+                gradlew 'Build', 'checkLicenses', 'build'
+                step {
+                    run.set 'git push && git push --tags'
+                }
+                gradlew 'Publish', 'publish'
+                mavenRelease('github')
+                modPublishing()
+            }
+        }
+        build_pr {
+            prettyName.set 'Build PR'
+            pullRequest.set(true)
+            gradleJob {
+                name.set 'build'
+                gradlew 'Build', 'checkLicenses', 'build'
+                gradlew 'Publish', 'publish'
+                pullRequestArtifact()
+            }
+        }
+        publish_pr {
+            prettyName.set 'Publish PR'
+            publishPullRequestAction(
+                'github',
+                'dev/lukebemish/dynamicassetgenerator/dynamicassetgenerator-*',
+                'Build PR'
+            )
+        }
     }
 }
 
@@ -19,13 +67,24 @@ managedVersioning.apply()
 
 println "Building: $version"
 
+configurations {
+    license {
+        canBeResolved = false
+        canBeConsumed = true
+    }
+}
+
+artifacts {
+    add 'license', file("LICENSE")
+}
+
 modsDotGroovy {
     dslVersion = libs.versions.mdg.dsl.get()
     platform 'multiloader'
     multiloader {
-        forge = [project(":NeoForge")]
-        fabric = [project(":FabriQuilt")]
-        quilt = [project(":FabriQuilt")]
+        forge = [project(":neoforge")]
+        fabric = [project(":fabriquilt")]
+        quilt = []
     }
 }
 
@@ -34,17 +93,9 @@ subprojects { p ->
     apply plugin: 'java-library'
     apply plugin: libs.plugins.quilt.licenser.get().pluginId
 
-    group = rootProject.group
-    version = rootProject.version
-    base.archivesName = "${rootProject.name}-${p.name.toLowerCase(Locale.ROOT)}-${libs.versions.minecraft.get()}"
-
     java.toolchain.languageVersion = JavaLanguageVersion.of(17)
     java.withSourcesJar()
     java.withJavadocJar()
-
-    javadoc {
-        include "**/api/**"
-    }
 
     license {
         rule rootProject.file('header.txt')
@@ -55,60 +106,13 @@ subprojects { p ->
     jar {
         manifest {
             attributes([
-                'Specification-Title'     : mod_name,
-                'Specification-Vendor'    : mod_author,
-                'Specification-Version'   : rootProject.version,
-                'Implementation-Title'    : "$mod_name - ${project.name}",
-                'Implementation-Version'  : rootProject.version,
-                'Implementation-Vendor'   : mod_author,
                 'Implementation-Commit-Time': managedVersioning.timestamp.get(),
-                'Implementation-Commit': managedVersioning.hash.get(),
-                'Build-On-Minecraft'      : libs.versions.minecraft.get(),
+                'Implementation-Commit': managedVersioning.hash.get()
             ])
         }
     }
 
-    repositories {
-        mavenCentral()
-
-        maven {
-            name = 'ParchmentMC'
-            url = 'https://maven.parchmentmc.org'
-        }
-
-        maven {
-            name 'Quilt (Release)'
-            url 'https://maven.quiltmc.org/repository/release/'
-        }
-    }
-
-    dependencies {
-        compileOnly libs.jetbrains.annotations
-        compileOnly libs.jspecify
-    }
-
-    tasks.withType(JavaCompile).configureEach {
-        it.options.encoding = 'UTF-8'
-        it.options.release = 17
-    }
-
-    publishing {
-        repositories {
-            if (System.getenv('PR_NUMBER')) {
-                maven {
-                    name = 'LocalMaven'
-                    url = rootProject.layout.buildDirectory.dir('repo')
-                }
-            } else if (System.getenv('MAVEN_PASSWORD')) {
-                maven {
-                    name = 'PersonalMaven'
-                    url = uri(System.getenv('SNAPSHOT_MAVEN_URL') ?: System.getenv('MAVEN_URL'))
-                    credentials {
-                        username = System.getenv('MAVEN_USER')
-                        password = System.getenv('MAVEN_PASSWORD')
-                    }
-                }
-            }
-        }
-    }
+    managedVersioning.publishing.mavenPulLRequest(publishing)
+    managedVersioning.publishing.mavenSnapshot(publishing)
+    managedVersioning.publishing.mavenRelease(publishing)
 }

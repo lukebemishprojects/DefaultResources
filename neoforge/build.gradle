@@ -1,0 +1,54 @@
+plugins {
+    id 'convention.consumer'
+    alias libs.plugins.architectury.loom
+}
+
+repositories {
+    maven {
+        name = 'NeoForged'
+        url = 'https://maven.neoforged.net/'
+    }
+}
+
+dependencies {
+    minecraft libs.minecraft
+    neoForge libs.neoforge
+    mappings loom.layered() {
+        officialMojangMappings()
+        parchment("org.parchmentmc.data:parchment-${libs.versions.parchment.minecraft.get()}:${libs.versions.parchment.mappings.get()}@zip")
+    }
+
+    compileOnly libs.autoservice
+    annotationProcessor libs.autoservice
+}
+
+loom {
+    runs {
+        client {
+            client()
+            setConfigName("NeoForge Client")
+            ideConfigGenerated(true)
+            runDir("run")
+        }
+        server {
+            server()
+            setConfigName("NeoForge Server")
+            ideConfigGenerated(true)
+            runDir("runserver")
+        }
+    }
+}
+
+import groovy.json.JsonOutput
+import groovy.json.JsonSlurper
+processResources {
+    doLast {
+        fileTree(dir: outputs.files.asPath, include: "mixin.*.json").each { File file ->
+            def obj = new JsonSlurper().parse(file)
+            if (obj.refmap) {
+                obj.remove('refmap')
+            }
+            file.text = JsonOutput.toJson(obj)
+        }
+    }
+}
