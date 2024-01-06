@@ -17,6 +17,7 @@ managedVersioning {
             workflowDispatch.set(true)
             onBranches.add '1.*'
             gradleJob {
+                buildCache()
                 name.set 'build'
                 gradlew 'Build', 'checkLicenses', 'build'
                 gradlew 'Publish', 'publish'
@@ -27,6 +28,7 @@ managedVersioning {
             prettyName.set 'Release'
             workflowDispatch.set(true)
             gradleJob {
+                buildCache()
                 name.set 'build'
                 step {
                     setupGitUser()
