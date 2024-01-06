@@ -10,7 +10,7 @@ import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import net.minecraft.SharedConstants;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackCompatibility;
 import net.minecraft.server.packs.repository.PackSource;
@@ -18,8 +18,8 @@ import net.minecraft.world.flag.FeatureFlagSet;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.event.AddPackFindersEvent;
+import net.neoforged.neoforge.resource.EmptyPackResources;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,9 +29,8 @@ import java.util.stream.Stream;
 @Mod(DefaultResources.MOD_ID)
 public class DefaultResourcesNeoForge {
 
-    public DefaultResourcesNeoForge() {
+    public DefaultResourcesNeoForge(IEventBus modbus) {
         DefaultResources.initialize();
-        IEventBus modbus = FMLJavaModLoadingContext.get().getModEventBus();
         modbus.register(this);
     }
 
@@ -42,19 +41,41 @@ public class DefaultResourcesNeoForge {
                 if (!Files.exists(Services.PLATFORM.getGlobalFolder()))
                     Files.createDirectories(Services.PLATFORM.getGlobalFolder());
                 List<Pair<String, Pack.ResourcesSupplier>> packs = DefaultResources.getPackResources(event.getPackType());
-                createPackStream(event.getPackType(), packs).forEach(packConsumer);
+                var desc = Component.literal("Global Resources");
+                Pack root = Pack.create(
+                    DefaultResources.MOD_ID,
+                    desc,
+                    true,
+                    new EmptyPackResources.EmptyResourcesSupplier(
+                        new PackMetadataSection(
+                            desc,
+                            SharedConstants.getCurrentVersion().getPackVersion(event.getPackType())
+                        ),
+                        false
+                    ),
+                    new Pack.Info(
+                        desc,
+                        PackCompatibility.COMPATIBLE,
+                        FeatureFlagSet.of(),
+                        List.of(),
+                        true
+                    ),
+                    Pack.Position.TOP,
+                    true,
+                    PackSource.DEFAULT
+                ).withChildren(createPackStream(packs).toList());
+                packConsumer.accept(root);
             } catch (IOException e) {
                 DefaultResources.LOGGER.error("Couldn't inject resources!");
             }
         });
     }
 
-    private static Stream<Pack> createPackStream(PackType packType, List<Pair<String, Pack.ResourcesSupplier>> packs) {
+    private static Stream<Pack> createPackStream(List<Pair<String, Pack.ResourcesSupplier>> packs) {
         return packs.stream().map(pair -> {
+            var desc = Component.literal("Global Resources - "+pair.getFirst());
             Pack.Info info = new Pack.Info(
-                Component.literal("Global Resources - "+pair.getFirst()),
-                SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA),
-                SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES),
+                desc,
                 PackCompatibility.COMPATIBLE,
                 FeatureFlagSet.of(),
                 List.of(),
@@ -62,7 +83,7 @@ public class DefaultResourcesNeoForge {
             );
             return Pack.create(
                 DefaultResources.MOD_ID + ":" + pair.getFirst(),
-                Component.literal("Global Resources"),
+                desc,
                 true,
                 pair.getSecond(),
                 info,
