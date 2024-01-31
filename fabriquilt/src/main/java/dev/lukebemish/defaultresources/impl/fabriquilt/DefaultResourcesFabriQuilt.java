@@ -36,6 +36,10 @@ public class DefaultResourcesFabriQuilt implements ModInitializer {
         FabricLoader.getInstance().getAllMods().forEach(mod -> consumer.accept(mod.getMetadata().getId(), mod.getRootPath()));
     }
 
+    public static void forAllModsParallel(BiConsumer<String, Path> consumer) {
+        FabricLoader.getInstance().getAllMods().parallelStream().forEach(mod -> consumer.accept(mod.getMetadata().getId(), mod.getRootPath()));
+    }
+
     public static void addPackResources(PackType type) {
         try {
             if (!Files.exists(Services.PLATFORM.getGlobalFolder()))

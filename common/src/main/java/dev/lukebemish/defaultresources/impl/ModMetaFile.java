@@ -8,9 +8,10 @@ package dev.lukebemish.defaultresources.impl;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-public record ModMetaFile(String resourcesPath, boolean zip) {
+public record ModMetaFile(String resourcesPath, boolean zip, boolean extract) {
     public static final Codec<ModMetaFile> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-        Codec.STRING.fieldOf("resources_path").forGetter(ModMetaFile::resourcesPath),
-        Codec.BOOL.fieldOf("zip").forGetter(ModMetaFile::zip)
+        Codec.STRING.optionalFieldOf("resources_path", "defaultresources").forGetter(ModMetaFile::resourcesPath),
+        Codec.BOOL.optionalFieldOf("zip", true).forGetter(ModMetaFile::zip),
+        Codec.BOOL.optionalFieldOf("extract", true).forGetter(ModMetaFile::extract)
     ).apply(instance, ModMetaFile::new));
 }

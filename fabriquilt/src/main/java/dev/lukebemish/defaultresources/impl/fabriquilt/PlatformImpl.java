@@ -38,7 +38,7 @@ public class PlatformImpl implements Platform {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
-        DefaultResourcesFabriQuilt.forAllMods((modID, path) -> {
+        DefaultResourcesFabriQuilt.forAllModsParallel((modID, path) -> {
             if (!modID.equals("minecraft")) {
                 DefaultResources.forMod(path::resolve, modID);
             }

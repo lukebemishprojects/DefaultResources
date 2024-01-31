@@ -46,6 +46,7 @@ public class PlatformImpl implements Platform {
         }
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
             .filter(PlatformImpl::isExtractable)
+            .parallel()
             .forEach(mod ->
                 DefaultResources.forMod(mod.getOwningFile().getFile()::findResource, mod.getModId()));
     }
