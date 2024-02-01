@@ -17,7 +17,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.Pack;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -42,16 +41,17 @@ public class DefaultResources {
     public static final String MOD_ID = "defaultresources";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
     private static final int BUFFER_SIZE = 1024;
-    private static final Set<String> OUTDATED_TARGETS = new HashSet<>();
+    public static final Map<String, Optional<String>> OUTDATED_TARGETS = new ConcurrentHashMap<>();
+    public static final Map<String, Optional<String>> MOD_TARGETS = new ConcurrentHashMap<>();
     private volatile static boolean GLOBAL_SETUP = false;
     private static final Map<String, List<OutdatedResourcesListener>> OUTDATED_RESOURCES_LISTENERS = new ConcurrentHashMap<>();
     public static final String META_FILE_PATH = DefaultResources.MOD_ID + ".meta.json";
-    public static final String CHECK_FILE_PATH = DefaultResources.MOD_ID + ".checksum";
+    public static final String CHECK_FILE_PATH = "." + DefaultResources.MOD_ID;
 
     public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
 
-    private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_RESOURCES = new ConcurrentHashMap<>();
-    private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new ConcurrentHashMap<>();
+    private static final Map<String, BiFunction<String, PackType, @Nullable Supplier<PackResources>>> QUEUED_RESOURCES = new ConcurrentHashMap<>();
+    private static final Map<String, BiFunction<String, PackType, @Nullable Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new ConcurrentHashMap<>();
     public static final String GLOBAL_PREFIX = "global";
 
     public static final GlobalResourceManager STATIC_ASSETS = createStaticResourceManager(PackType.CLIENT_RESOURCES);
@@ -84,8 +84,12 @@ public class DefaultResources {
 
         try {
             if (Files.exists(defaultResources)) {
+                MOD_TARGETS.put(modId, meta.dataVersion());
                 var defaultExtraction = meta.extract() ? Config.ExtractionState.EXTRACT : Config.ExtractionState.UNEXTRACTED;
                 Config.ExtractionState extractionState = Config.INSTANCE.get().extract().getOrDefault(modId, defaultExtraction);
+                if (extractionState == Config.ExtractionState.OUTDATED) {
+                    extractionState = defaultExtraction;
+                }
                 if (!Config.INSTANCE.get().extract().containsKey(modId)) {
                     Config.INSTANCE.get().extract().put(modId, defaultExtraction);
                 }
@@ -102,13 +106,9 @@ public class DefaultResources {
                     Config.INSTANCE.get().extract().put(modId, meta.extract() ? Config.ExtractionState.EXTRACT : Config.ExtractionState.EXTRACTED);
                     if (!meta.zip()) {
                         Path outPath = Services.PLATFORM.getGlobalFolder().resolve(modId);
-                        String checksum = shouldCopy(defaultResources, outPath, Files.exists(outPath));
+                        String checksum = shouldCopy(defaultResources, outPath, Files.exists(outPath), modId, meta);
                         if (checksum != null) {
-                            copyResources(defaultResources, outPath, checksum);
-                        } else {
-                            DefaultResources.LOGGER.error("Could not extract default resources for mod {} because they are already extracted and have been changed on disk", modId);
-                            addOutdatedTarget(modId);
-                            Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.OUTDATED);
+                            copyResources(defaultResources, outPath, checksum, meta.dataVersion().orElse(null));
                         }
                     } else {
                         Path zipPath = Services.PLATFORM.getGlobalFolder().resolve(modId + ".zip");
@@ -118,13 +118,9 @@ public class DefaultResources {
                             URI.create("jar:" + zipPath.toAbsolutePath().toUri()),
                             Collections.singletonMap("create", "true"))) {
                             Path outPath = zipFs.getPath("/");
-                            checksum = shouldCopy(defaultResources, outPath, zipExists);
+                            checksum = shouldCopy(defaultResources, outPath, zipExists, modId, meta);
                             if (checksum != null && !zipExists) {
-                                copyResources(defaultResources, outPath, checksum);
-                            } else if (checksum == null) {
-                                DefaultResources.LOGGER.error("Could not extract default resources for mod {} because they are already extracted and have been changed on disk", modId);
-                                addOutdatedTarget(modId);
-                                Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.OUTDATED);
+                                copyResources(defaultResources, outPath, checksum, meta.dataVersion().orElse(null));
                             }
                         }
                         if (checksum != null && zipExists) {
@@ -133,7 +129,7 @@ public class DefaultResources {
                                 URI.create("jar:" + zipPath.toAbsolutePath().toUri()),
                                 Collections.singletonMap("create", "true"))) {
                                 Path outPath = zipFs.getPath("/");
-                                copyResources(defaultResources, outPath, checksum);
+                                copyResources(defaultResources, outPath, checksum, meta.dataVersion().orElse(null));
                             }
                         }
                     }
@@ -143,30 +139,48 @@ public class DefaultResources {
             DefaultResources.LOGGER.error("Could not handle default resources for mod {}", modId, e);
         }
     }
-    private static synchronized void addOutdatedTarget(String modId) {
-        OUTDATED_TARGETS.add(modId);
+
+    private static void couldNotUpdate(String modId, Path outPath, ModMetaFile meta) {
+        String oldDataVersion;
+        try {
+            oldDataVersion = dataVersion(outPath);
+        } catch (IOException e) {
+            DefaultResources.LOGGER.error("Could not read old data version for mod {}", modId, e);
+            oldDataVersion = null;
+        }
+        DefaultResources.LOGGER.error("Could not extract default resources for mod {} (data version {} to version {}) because they are already extracted and have been changed on disk", modId, oldDataVersion, meta.dataVersion().orElse(null));
+        OUTDATED_TARGETS.put(modId, Optional.ofNullable(oldDataVersion));
+        Config.INSTANCE.get().extract().put(modId, Config.ExtractionState.OUTDATED);
     }
 
-    public static synchronized boolean isTargetOutdated(String modId) {
-        return OUTDATED_TARGETS.contains(modId);
-    }
-
-    private static @Nullable String shouldCopy(Path defaultResources, Path outPath, boolean alreadyExists) {
+    private static @Nullable String shouldCopy(Path defaultResources, Path outPath, boolean alreadyExists, String modId, ModMetaFile meta) {
         try {
             if (alreadyExists) {
                 Path checksumPath = outPath.resolve(CHECK_FILE_PATH);
                 String oldChecksum;
+                String oldVersion;
                 if (Files.exists(checksumPath)) {
-                    oldChecksum = Files.readString(checksumPath);
+                    var parts = Files.readString(checksumPath).split(":", 2);
+                    oldChecksum = parts[0];
+                    if (parts.length == 2) {
+                        oldVersion = parts[1];
+                    } else {
+                        oldVersion = null;
+                    }
                 } else {
+                    couldNotUpdate(modId, outPath, meta);
                     return null;
                 }
-                String newExtractedChecksum = checkPath(outPath);
-                if (newExtractedChecksum.equals(oldChecksum)) {
-                    String newChecksum = checkPath(defaultResources);
-                    if (newChecksum.equals(oldChecksum)) {
-                        return null;
-                    } else {
+                String newChecksum = checkPath(defaultResources);
+                String newVersion = meta.dataVersion().orElse(null);
+                if (newChecksum.equals(oldChecksum) && Objects.equals(newVersion, oldVersion)) {
+                    // The resources to extract have not changed, but the extracted resources have been modified
+                    return null;
+                } else {
+                    // The resources to extract differ from the saved checksum
+                    String newExtractedChecksum = checkPath(outPath);
+                    if (newExtractedChecksum.equals(oldChecksum)) {
+                        // The calculated extracted checksum does not differ from the saved checksum
                         return newChecksum;
                     }
                 }
@@ -176,16 +190,27 @@ public class DefaultResources {
         } catch (IOException e) {
             DefaultResources.LOGGER.error("Error checking compatibility of resources from {} targeted at {}", defaultResources, outPath, e);
         }
+        couldNotUpdate(modId, outPath, meta);
         return null;
     }
 
-    @NotNull
-    private static String checkPath(Path defaultResources) throws IOException {
+    private static @Nullable String dataVersion(Path path) throws IOException {
+        Path checksumPath = path.resolve(CHECK_FILE_PATH);
+        if (Files.exists(checksumPath)) {
+            var parts = Files.readString(checksumPath).split(":", 2);
+            if (parts.length == 2) {
+                return parts[1];
+            }
+        }
+        return null;
+    }
+
+    private static String checkPath(Path path) throws IOException {
         StringBuilder newChecksum = new StringBuilder();
-        try (var walk = Files.walk(defaultResources)) {
-            walk.sorted(Comparator.comparing(p -> defaultResources.relativize(p).toString())).forEach(p -> {
+        try (var walk = Files.walk(path)) {
+            walk.sorted(Comparator.comparing(p -> path.relativize(p).toString())).forEach(p -> {
                 try {
-                    if (!Files.isDirectory(p) && !p.endsWith(CHECK_FILE_PATH)) {
+                    if (!Files.isDirectory(p) && !(path.relativize(p).getNameCount() == 1 && p.endsWith(CHECK_FILE_PATH))) {
                         Checksum check = new Adler32();
                         try (var is = Files.newInputStream(p)) {
                             byte[] buffer = new byte[BUFFER_SIZE];
@@ -212,7 +237,7 @@ public class DefaultResources {
         return sb;
     }
 
-    private static void copyResources(Path defaultResources, Path outPath, String checksum) {
+    private static void copyResources(Path defaultResources, Path outPath, String checksum, @Nullable String dataVersion) {
         try (var walk = Files.walk(defaultResources)) {
             walk.sorted(Comparator.comparing(p -> p.relativize(defaultResources).toString())).forEach(p -> {
                 try {
@@ -227,7 +252,7 @@ public class DefaultResources {
                 }
             });
             Path checksumPath = outPath.resolve(CHECK_FILE_PATH);
-            Files.writeString(checksumPath, checksum);
+            Files.writeString(checksumPath, checksum + (dataVersion == null ? "" : ":" + dataVersion));
         } catch (IOException e) {
             DefaultResources.LOGGER.error("Error checking compatibility of resources from {} targeted at {}", defaultResources, outPath, e);
         }
@@ -318,14 +343,25 @@ public class DefaultResources {
         return packs;
     }
 
+    public synchronized static void delegate(Runnable ifInitialized, Runnable ifUninitialized) {
+        if (GLOBAL_SETUP) {
+            ifInitialized.run();
+        } else {
+            ifUninitialized.run();
+        }
+    }
+
     public synchronized static void initialize() {
         if (!GLOBAL_SETUP) {
             GLOBAL_SETUP = true;
             Services.PLATFORM.extractResources();
             DefaultResources.cleanupExtraction();
         }
-        for (String modId : OUTDATED_TARGETS) {
-            OUTDATED_RESOURCES_LISTENERS.getOrDefault(modId, List.of()).forEach(OutdatedResourcesListener::resourcesOutdated);
+        for (var entry : OUTDATED_TARGETS.entrySet()) {
+            String oldVersion = MOD_TARGETS.getOrDefault(entry.getKey(), Optional.empty()).orElse(null);
+            String newVersion = entry.getValue().orElse(null);
+            String modId = entry.getKey();
+            OUTDATED_RESOURCES_LISTENERS.getOrDefault(modId, List.of()).forEach(listener -> listener.resourcesOutdated(oldVersion, newVersion));
         }
     }
 
