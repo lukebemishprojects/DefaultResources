@@ -21,20 +21,21 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.zip.ZipFile;
 
-public record Config(HashMap<String, ExtractionState> extract, HashMap<String, Boolean> fromResourcePacks) {
+public record Config(ConcurrentHashMap<String, ExtractionState> extract, HashMap<String, Boolean> fromResourcePacks) {
     public static final Codec<Config> CODEC = RecordCodecBuilder.create(i -> i.group(
-        Codec.unboundedMap(Codec.STRING, StringRepresentable.fromEnum(ExtractionState::values)).xmap(HashMap::new, Function.identity()).fieldOf("extract").forGetter(Config::extract),
+        Codec.unboundedMap(Codec.STRING, StringRepresentable.fromEnum(ExtractionState::values)).xmap(ConcurrentHashMap::new, Function.identity()).fieldOf("extract").forGetter(Config::extract),
         Codec.unboundedMap(Codec.STRING, Codec.BOOL).fieldOf("from_resource_packs").xmap(HashMap::new, Function.identity()).forGetter(Config::fromResourcePacks)
     ).apply(i, Config::new));
 
     public static final Supplier<Config> INSTANCE = Suppliers.memoize(Config::readFromConfig);
 
     private static Config getDefault() {
-        return new Config(new HashMap<>(), new HashMap<>());
+        return new Config(new ConcurrentHashMap<>(), new HashMap<>());
     }
 
     private static Config readFromConfig() {
@@ -53,7 +54,7 @@ public record Config(HashMap<String, ExtractionState> extract, HashMap<String, B
                 // Already caught and logged.
             }
         }
-        var map = new HashMap<>(config.extract());
+        var map = new ConcurrentHashMap<>(config.extract());
         Services.PLATFORM.getExistingModdedPaths(DefaultResources.META_FILE_PATH).forEach((modId, metaPath) -> {
             try (var is = Files.newInputStream(metaPath)) {
                 JsonElement object = DefaultResources.GSON.fromJson(new InputStreamReader(is), JsonElement.class);
