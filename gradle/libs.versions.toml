@@ -18,7 +18,7 @@ quilt_licenser = "2.0.1"
 jetbrains_annotations = "24.0.1"
 jspecify = "0.3.0"
 
-managedversioning = "1.2.3"
+managedversioning = "1.2.6"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
