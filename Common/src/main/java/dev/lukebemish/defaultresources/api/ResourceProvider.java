@@ -8,15 +8,12 @@ package dev.lukebemish.defaultresources.api;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
 import dev.lukebemish.defaultresources.impl.Services;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackResources;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.IoSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collection;
-import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -25,9 +22,10 @@ import java.util.stream.Stream;
  */
 public interface ResourceProvider {
     /**
-     * This should be run before your config file is written too, to ensure that DefaultResources takes it into account
-     * when figuring out whether to extract default resources.
+     * This is no longer needed; simply call {@link ResourceProvider#instance()} when you need resources. DefaultResources
+     * no longer uses config files as markers.
      */
+    @Deprecated
     static void forceInitialization() {
         ResourceProvider.instance();
     }
@@ -41,8 +39,8 @@ public interface ResourceProvider {
     static ResourceProvider instance() {
         if (DefaultResources.RESOURCE_PROVIDER == null) {
             Services.PLATFORM.extractResources();
-            DefaultResources.cleanupExtraction();
             DefaultResources.RESOURCE_PROVIDER = DefaultResources.assembleResourceProvider();
+            DefaultResources.cleanupExtraction();
         }
         return DefaultResources.RESOURCE_PROVIDER;
     }

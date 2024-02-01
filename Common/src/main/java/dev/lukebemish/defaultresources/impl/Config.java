@@ -60,7 +60,7 @@ public record Config(HashMap<String, ExtractionState> extract, HashMap<String, B
                 ModMetaFile metaFile = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, object).getOrThrow(false, e -> {
                 });
                 if (!map.containsKey(modId)) {
-                    map.put(modId, metaFile.extractsByDefault() ? ExtractionState.EXTRACT : ExtractionState.UNEXTRACTED);
+                    map.put(modId, metaFile.extract() ? ExtractionState.EXTRACT : ExtractionState.UNEXTRACTED);
                 }
             } catch (IOException | RuntimeException e) {
                 DefaultResources.LOGGER.warn("We thought there was a readable {} for mod {}, but we got an error when reading it!",
@@ -162,17 +162,10 @@ public record Config(HashMap<String, ExtractionState> extract, HashMap<String, B
     }
 
     enum ExtractionState implements StringRepresentable {
-        UNEXTRACTED(false, false),
-        EXTRACT(true, true),
-        EXTRACTED(true, false);
-
-        public final boolean extractIfMissing;
-        public final boolean extractRegardless;
-
-        ExtractionState(boolean extractIfMissing, boolean extractRegardless) {
-            this.extractIfMissing = extractIfMissing;
-            this.extractRegardless = extractRegardless;
-        }
+        UNEXTRACTED,
+        EXTRACT,
+        EXTRACTED,
+        OUTDATED;
 
         @Override
         public @NotNull String getSerializedName() {

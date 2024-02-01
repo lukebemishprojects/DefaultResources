@@ -41,8 +41,9 @@ public class PlatformImpl implements IPlatform {
         }
         FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
             .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
+            .parallel()
             .forEach(mod ->
-                DefaultResources.forMod(FMLPaths.CONFIGDIR.get(), mod.getOwningFile().getFile()::findResource, mod.getModId()));
+                DefaultResources.forMod(mod.getOwningFile().getFile()::findResource, mod.getModId()));
     }
 
     @Override

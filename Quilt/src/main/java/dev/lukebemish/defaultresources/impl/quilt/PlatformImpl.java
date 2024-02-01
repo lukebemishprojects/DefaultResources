@@ -37,10 +37,10 @@ public class PlatformImpl implements IPlatform {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
-        QuiltLoader.getAllMods().forEach(mod -> {
+        QuiltLoader.getAllMods().parallelStream().forEach(mod -> {
             String modid = mod.metadata().id();
             if (!modid.equals("minecraft")) {
-                DefaultResources.forMod(QuiltLoader.getConfigDir(), mod.rootPath().toAbsolutePath()::resolve, modid);
+                DefaultResources.forMod(mod.rootPath().toAbsolutePath()::resolve, modid);
             }
         });
     }

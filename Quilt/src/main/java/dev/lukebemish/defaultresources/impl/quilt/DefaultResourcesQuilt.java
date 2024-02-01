@@ -22,7 +22,7 @@ import java.util.List;
 public class DefaultResourcesQuilt implements ModInitializer {
     @Override
     public void onInitialize(ModContainer mod) {
-        ResourceProvider.forceInitialization();
+        ResourceProvider.instance();
         addPackResources(PackType.SERVER_DATA);
     }
 
