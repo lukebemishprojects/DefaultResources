@@ -5,7 +5,12 @@
 
 A tool for providing default "resources" (assets, world-specific data, or other data) for a mod. Data is bundled in the `defaultresources` folder of the mod jar, and is read from that folder at runtime. Data can be extracted from that folder into `globalresources` by defaultresources when a user wants to modify it, through the defaultresources config. The behavior of `defaulrresources` for a single mod is controlled by the `defaultresources.meta.json` file.
 
-Documentation for this library is a work in progress, though it will exist eventually. For an example use case, see [Excavated Variants](https://github.com/lukebemish/excavated_variants)
+The core of DefaultResources is `GlobalResourceManager`, which provides a vanilla `ResourceManager` for "global" assets and data.
+This data is loaded from the `gobaldata` or `globalassets` folders of mods, detected global resource packs, or archives or
+folders in the `globalresources` folder. Mods can also bundle "default" resources, in a `defaultresources` folder by default,
+that will be loaded or extracted depending on mod configuration.
+
+For an example use case, see [Excavated Variants](https://github.com/lukebemish/excavated_variants)
 
 ## Meta File Format
 
@@ -13,6 +18,8 @@ The `defaultresources.meta.json` file defines how DefaultResources should treat 
 
 * `resources_path` - the path to default resources within the mod jar. Optional; defaults to `defaultresources`
 * `zip` - whether, when extracted, the resources should be zipped. Optional; defaults to true.
+* `extract` - whether the bundled default resources should be extracted and kept up to date by default. Optional; defaults to true. A hash is saved alongside the resources so that user modifications will not be overwritten.
+* `data_version` - a version number for the bundled default resources. Optional. Saved alongside the resources so that mods can be given more context, through a registered `OutdatedResourcesListener`, if their resources to extract could not be extracted due to user modifications.
 
 ## Detection from `resourcepacks`
 
