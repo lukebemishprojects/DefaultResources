@@ -2,6 +2,7 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'idea'
+    id 'dev.lukebemish.conventions.project'
 }
 
 version = rootProject.version
@@ -36,8 +37,6 @@ configurations {
 }
 
 dependencies {
-    compileOnly libs.jetbrains.annotations
-    compileOnly libs.jspecify
     rootProjectLicense project(path: ':', configuration: 'license')
 }
 

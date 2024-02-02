@@ -11,9 +11,6 @@ dependencies {
     minecraft libs.minecraft
     modImplementation libs.fabric.loader
     modImplementation libs.fabric.api
-
-    compileOnly libs.autoservice
-    annotationProcessor libs.autoservice
 }
 
 loom {

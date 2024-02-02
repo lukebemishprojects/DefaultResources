@@ -10,15 +10,9 @@ fabric_api = "0.92.1+1.20.4"
 
 mdg_plugin = "1.4.3"
 mdg_dsl = "1.5.1"
-autoservice = "1.1.1"
 
 architectury_loom = "1.4.373"
 quilt_licenser = "2.0.1"
-
-jetbrains_annotations = "24.0.1"
-jspecify = "0.3.0"
-
-managedversioning = "1.2.6"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -28,14 +22,8 @@ fabric_api = { module = "net.fabricmc.fabric-api:fabric-api", version.ref = "fab
 
 neoforge = { module = "net.neoforged:neoforge", version.ref = "neoforge" }
 
-jetbrains_annotations = { module = "org.jetbrains:annotations", version.ref = "jetbrains_annotations" }
-jspecify = { module = "org.jspecify:jspecify", version.ref = "jspecify" }
-
-autoservice = { module = "com.google.auto.service:auto-service", version.ref = "autoservice" }
-
 [plugins]
 
-managedversioning = { id = "dev.lukebemish.managedversioning", version.ref = "managedversioning" }
 mdg_plugin = { id = "org.groovymc.modsdotgroovy", version.ref = "mdg_plugin" }
 quilt_licenser = { id = "org.quiltmc.gradle.licenser", version.ref = "quilt_licenser" }
 architectury_loom = { id = "dev.architectury.loom", version.ref = "architectury_loom" }
