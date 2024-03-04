@@ -11,7 +11,7 @@ fabric_api = "0.92.1+1.20.4"
 mdg_plugin = "1.4.3"
 mdg_dsl = "1.5.1"
 
-architectury_loom = "1.4.373"
+architectury_loom = "1.5.389"
 quilt_licenser = "2.0.1"
 
 [libraries]
