@@ -115,7 +115,7 @@ public class DefaultResources {
                         boolean zipExists = Files.exists(zipPath);
                         String checksum;
                         try (FileSystem zipFs = FileSystems.newFileSystem(
-                            URI.create("jar:" + zipPath.toAbsolutePath().toUri()),
+                            zipPath,
                             Collections.singletonMap("create", "true"))) {
                             Path outPath = zipFs.getPath("/");
                             checksum = shouldCopy(defaultResources, outPath, zipExists, modId, meta);
@@ -126,7 +126,7 @@ public class DefaultResources {
                         if (checksum != null && zipExists) {
                             Files.delete(zipPath);
                             try (FileSystem zipFs = FileSystems.newFileSystem(
-                                URI.create("jar:" + zipPath.toAbsolutePath().toUri()),
+                                zipPath,
                                 Collections.singletonMap("create", "true"))) {
                                 Path outPath = zipFs.getPath("/");
                                 copyResources(defaultResources, outPath, checksum, meta.dataVersion().orElse(null));
@@ -353,9 +353,9 @@ public class DefaultResources {
 
     public synchronized static void initialize() {
         if (!GLOBAL_SETUP) {
-            GLOBAL_SETUP = true;
             Services.PLATFORM.extractResources();
             DefaultResources.cleanupExtraction();
+            GLOBAL_SETUP = true;
         }
         for (var entry : OUTDATED_TARGETS.entrySet()) {
             String oldVersion = MOD_TARGETS.getOrDefault(entry.getKey(), Optional.empty()).orElse(null);
