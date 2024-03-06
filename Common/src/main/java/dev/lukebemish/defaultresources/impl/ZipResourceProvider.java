@@ -8,7 +8,6 @@ package dev.lukebemish.defaultresources.impl;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
@@ -26,7 +25,7 @@ public class ZipResourceProvider extends PathResourceProvider {
     private FileSystem getZipFile() throws IOException {
         if (this.zipFile == null)
             this.zipFile = FileSystems.newFileSystem(
-                URI.create("jar:" + source.toAbsolutePath().toUri()),
+                source,
                 Map.of());
         return this.zipFile;
     }

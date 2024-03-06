@@ -37,12 +37,15 @@ public interface ResourceProvider {
      */
     @SuppressWarnings("UnusedReturnValue")
     static ResourceProvider instance() {
-        if (DefaultResources.RESOURCE_PROVIDER == null) {
-            Services.PLATFORM.extractResources();
-            DefaultResources.RESOURCE_PROVIDER = DefaultResources.assembleResourceProvider();
-            DefaultResources.cleanupExtraction();
+        synchronized (ResourceProvider.class) {
+            if (DefaultResources.RESOURCE_PROVIDER == null) {
+                Services.PLATFORM.extractResources();
+                var providers = DefaultResources.assembleResourceProvider();
+                DefaultResources.cleanupExtraction();
+                DefaultResources.RESOURCE_PROVIDER = providers;
+            }
+            return DefaultResources.RESOURCE_PROVIDER;
         }
-        return DefaultResources.RESOURCE_PROVIDER;
     }
 
     /**

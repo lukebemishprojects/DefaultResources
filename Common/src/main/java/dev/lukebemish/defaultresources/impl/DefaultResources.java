@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -50,7 +49,7 @@ public class DefaultResources {
 
     public static final Gson GSON = new GsonBuilder().setLenient().setPrettyPrinting().create();
 
-    public static ResourceProvider RESOURCE_PROVIDER;
+    public volatile static ResourceProvider RESOURCE_PROVIDER;
 
     private static final Map<String, ResourceProvider> QUEUED_PROVIDERS = new ConcurrentHashMap<>();
     private static final Map<String, BiFunction<String, PackType, Supplier<PackResources>>> QUEUED_RESOURCES = new ConcurrentHashMap<>();
@@ -149,8 +148,9 @@ public class DefaultResources {
                         boolean zipExists = Files.exists(zipPath);
                         String checksum;
                         try (FileSystem zipFs = FileSystems.newFileSystem(
-                            URI.create("jar:" + zipPath.toAbsolutePath().toUri()),
-                            Collections.singletonMap("create", "true"))) {
+                            zipPath,
+                            Collections.singletonMap("create", "true"))
+                        ) {
                             Path outPath = zipFs.getPath("/");
                             checksum = shouldCopy(defaultResources, outPath, zipExists, modId, meta);
                             if (checksum != null && !zipExists) {
@@ -160,7 +160,7 @@ public class DefaultResources {
                         if (checksum != null && zipExists) {
                             Files.delete(zipPath);
                             try (FileSystem zipFs = FileSystems.newFileSystem(
-                                URI.create("jar:" + zipPath.toAbsolutePath().toUri()),
+                                zipPath,
                                 Collections.singletonMap("create", "true"))) {
                                 Path outPath = zipFs.getPath("/");
                                 copyResources(defaultResources, outPath, checksum, meta.dataVersion().orElse(null));
