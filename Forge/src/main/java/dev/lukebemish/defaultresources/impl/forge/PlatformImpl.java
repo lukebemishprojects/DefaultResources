@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Luke Bemish, and contributors
+ * Copyright (C) 2023-2024 Luke Bemish, and contributors
  * SPDX-License-Identifier: LGPL-3.0-or-later
  */
 
@@ -9,6 +9,7 @@ import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
 import dev.lukebemish.defaultresources.api.ResourceProvider;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
+import dev.lukebemish.defaultresources.impl.ParallelExecutor;
 import dev.lukebemish.defaultresources.impl.PathResourceProvider;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.IPlatform;
@@ -39,10 +40,10 @@ public class PlatformImpl implements IPlatform {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
-        FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
-            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft")))
-            .parallel()
-            .forEach(mod ->
+
+        ParallelExecutor.execute(FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
+            .filter(mod -> !(mod.getModId().equals("forge") || mod.getModId().equals("minecraft"))),
+            mod ->
                 DefaultResources.forMod(mod.getOwningFile().getFile()::findResource, mod.getModId()));
     }
 
