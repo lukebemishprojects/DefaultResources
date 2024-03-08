@@ -5,7 +5,7 @@
 
 package dev.lukebemish.defaultresources.api;
 
-import dev.lukebemish.defaultresources.impl.DefaultResources;
+import dev.lukebemish.defaultresources.impl.ManagerHolder;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.WrappingResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -30,7 +30,7 @@ public interface GlobalResourceManager extends ResourceManager {
         if (!Services.PLATFORM.isClient()) {
             throw new IllegalStateException("Cannot create client resource manager on dedicated server");
         }
-        return DefaultResources.STATIC_ASSETS;
+        return ManagerHolder.STATIC_ASSETS;
     }
 
     /**
@@ -41,7 +41,7 @@ public interface GlobalResourceManager extends ResourceManager {
     @NonNull
     @Contract(pure = true)
     static GlobalResourceManager getGlobalData() {
-        return DefaultResources.STATIC_DATA;
+        return ManagerHolder.STATIC_DATA;
     }
 
     /**

@@ -9,6 +9,7 @@ import com.google.auto.service.AutoService;
 import com.mojang.datafixers.util.Pair;
 import dev.lukebemish.defaultresources.impl.AutoMetadataPathPackResources;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
+import dev.lukebemish.defaultresources.impl.ParallelExecutor;
 import dev.lukebemish.defaultresources.impl.Services;
 import dev.lukebemish.defaultresources.impl.services.Platform;
 import net.minecraft.server.packs.PackResources;
@@ -44,11 +45,9 @@ public class PlatformImpl implements Platform {
         } catch (IOException e) {
             DefaultResources.LOGGER.error(e);
         }
-        FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
-            .filter(PlatformImpl::isExtractable)
-            .parallel()
-            .forEach(mod ->
-                DefaultResources.forMod(mod.getOwningFile().getFile()::findResource, mod.getModId()));
+        ParallelExecutor.execute(FMLLoader.getLoadingModList().getModFiles().stream().flatMap(f -> f.getMods().stream())
+            .filter(PlatformImpl::isExtractable),
+            mod -> DefaultResources.forMod(mod.getOwningFile().getFile()::findResource, mod.getModId()));
     }
 
     @Override

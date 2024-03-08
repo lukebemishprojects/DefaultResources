@@ -24,7 +24,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
@@ -53,9 +52,6 @@ public class DefaultResources {
     private static final Map<String, BiFunction<String, PackType, @Nullable Supplier<PackResources>>> QUEUED_RESOURCES = new ConcurrentHashMap<>();
     private static final Map<String, BiFunction<String, PackType, @Nullable Supplier<PackResources>>> QUEUED_STATIC_RESOURCES = new ConcurrentHashMap<>();
     public static final String GLOBAL_PREFIX = "global";
-
-    public static final GlobalResourceManager STATIC_ASSETS = createStaticResourceManager(PackType.CLIENT_RESOURCES);
-    public static final GlobalResourceManager STATIC_DATA = createStaticResourceManager(PackType.SERVER_DATA);
 
     public static void addListener(String modId, OutdatedResourcesListener listener) {
         OUTDATED_RESOURCES_LISTENERS.computeIfAbsent(modId, s -> new ArrayList<>()).add(listener);
@@ -355,13 +351,13 @@ public class DefaultResources {
         if (!GLOBAL_SETUP) {
             Services.PLATFORM.extractResources();
             DefaultResources.cleanupExtraction();
+            for (var entry : OUTDATED_TARGETS.entrySet()) {
+                String oldVersion = MOD_TARGETS.getOrDefault(entry.getKey(), Optional.empty()).orElse(null);
+                String newVersion = entry.getValue().orElse(null);
+                String modId = entry.getKey();
+                OUTDATED_RESOURCES_LISTENERS.getOrDefault(modId, List.of()).forEach(listener -> listener.resourcesOutdated(oldVersion, newVersion));
+            }
             GLOBAL_SETUP = true;
-        }
-        for (var entry : OUTDATED_TARGETS.entrySet()) {
-            String oldVersion = MOD_TARGETS.getOrDefault(entry.getKey(), Optional.empty()).orElse(null);
-            String newVersion = entry.getValue().orElse(null);
-            String modId = entry.getKey();
-            OUTDATED_RESOURCES_LISTENERS.getOrDefault(modId, List.of()).forEach(listener -> listener.resourcesOutdated(oldVersion, newVersion));
         }
     }
 

@@ -7,6 +7,7 @@ package dev.lukebemish.defaultresources.impl.fabriquilt;
 
 import com.mojang.datafixers.util.Pair;
 import dev.lukebemish.defaultresources.impl.DefaultResources;
+import dev.lukebemish.defaultresources.impl.ParallelExecutor;
 import dev.lukebemish.defaultresources.impl.Services;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.loader.api.FabricLoader;
@@ -37,7 +38,7 @@ public class DefaultResourcesFabriQuilt implements ModInitializer {
     }
 
     public static void forAllModsParallel(BiConsumer<String, Path> consumer) {
-        FabricLoader.getInstance().getAllMods().parallelStream().forEach(mod -> consumer.accept(mod.getMetadata().getId(), mod.getRootPath()));
+        ParallelExecutor.execute(FabricLoader.getInstance().getAllMods().stream(), mod -> consumer.accept(mod.getMetadata().getId(), mod.getRootPath()));
     }
 
     public static void addPackResources(PackType type) {
