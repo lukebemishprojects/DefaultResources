@@ -56,8 +56,16 @@ public record Config(ConcurrentHashMap<String, ExtractionState> extract, HashMap
         }
         var map = new ConcurrentHashMap<>(config.extract());
         Services.PLATFORM.getExistingModdedPaths(DefaultResources.META_FILE_PATH).forEach((modId, metaPath) -> {
-            if (!map.containsKey(modId)) {
-                map.put(modId, ExtractionState.UNEXTRACTED);
+            try (var is = Files.newInputStream(metaPath)) {
+                JsonElement object = DefaultResources.GSON.fromJson(new InputStreamReader(is), JsonElement.class);
+                ModMetaFile metaFile = ModMetaFile.CODEC.parse(JsonOps.INSTANCE, object).getOrThrow(false, e -> {
+                });
+                if (!map.containsKey(modId)) {
+                    map.put(modId, metaFile.extract() ? ExtractionState.EXTRACT : ExtractionState.UNEXTRACTED);
+                }
+            } catch (IOException | RuntimeException e) {
+                DefaultResources.LOGGER.warn("We thought there was a readable {} for mod {}, but we got an error when reading it!",
+                    DefaultResources.META_FILE_PATH, modId, e);
             }
         });
 
