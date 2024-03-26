@@ -22,7 +22,7 @@
                         "restore-keys": "${{ runner.os }}-gradle-"
                     },
                     "name": "Cache",
-                    "uses": "actions/cache/restore@v3"
+                    "uses": "actions/cache/restore@v4"
                 },
                 {
                     "with": {
@@ -30,11 +30,11 @@
                         "gradle-home-cache-cleanup": true
                     },
                     "name": "Setup Gradle",
-                    "uses": "gradle/gradle-build-action@v2"
+                    "uses": "gradle/gradle-build-action@v3"
                 },
                 {
                     "name": "Build",
-                    "run": "./gradlew checkLicenses build",
+                    "run": "./gradlew build",
                     "id": "build",
                     "env": {
                         "PR_NUMBER": "${{ github.event.pull_request.number }}"

@@ -1,3 +1,7 @@
 plugins {
-    id 'groovy-gradle-plugin'
+    alias cLibs.plugins.conventions.buildsrc
+}
+
+dependencies {
+    implementation cLibs.conventions.java
 }

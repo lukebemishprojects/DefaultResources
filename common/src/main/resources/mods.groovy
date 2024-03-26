@@ -1,29 +1,19 @@
-/*
- * Copyright (C) 2024 Luke Bemish, and contributors
- * SPDX-License-Identifier: LGPL-3.0-or-later
- */
-
-import modsdotgroovy.Dependency
-
-/*
- * Copyright (C) 2023 Luke Bemish, and contributors
- * SPDX-License-Identifier: LGPL-3.0-or-later
- */
-
-ModsDotGroovy.make {
+MultiplatformModsDotGroovy.make {
     modLoader = 'javafml'
     loaderVersion = '[1,)'
     issueTrackerUrl = 'https://github.com/lukebemishprojects/DefaultResources/issues'
     license = 'LGPL-3.0-or-later'
 
     mod {
-        modId = this.buildProperties.mod_id
-        displayName = this.buildProperties.mod_name
-        version = this.version
+        modId = buildProperties.mod_id
+        displayName = buildProperties.mod_name
+        version = environmentInfo.version
         displayUrl = 'https://github.com/lukebemishprojects/DefaultResources'
-        contact.sources = 'https://github.com/lukebemishprojects/DefaultResources'
-        author 'Luke Bemish'
-        description = "A tool for loading and extracting resources provided by mods or by users."
+        contact {
+            sources = 'https://github.com/lukebemishprojects/DefaultResources'
+        }
+        author = 'Luke Bemish'
+        description = buildProperties.description
 
         entrypoints {
             main = 'dev.lukebemish.defaultresources.impl.fabriquilt.DefaultResourcesFabriQuilt'
@@ -32,43 +22,30 @@ ModsDotGroovy.make {
 
         dependencies {
             mod 'minecraft', {
-                def minor = this.libs.versions.minecraft.split(/\./)[1] as int
-                versionRange = "[${this.libs.versions.minecraft},1.${minor+1}.0)"
+                def minor = libs.versions.minecraft.split(/\./)[1] as int
+                versionRange = "[${libs.versions.minecraft},1.${minor+1}.0)"
             }
-            onForge {
-                neoforge = ">=${this.libs.versions.neoforge}"
+            onNeoForge {
+                neoforge = ">=${libs.versions.neoforge}"
             }
             onFabric {
                 mod 'fabricloader', {
-                    versionRange = ">=${this.libs.versions.fabric.loader}"
+                    versionRange = ">=${libs.versions.fabric_loader}"
                 }
                 mod 'fabric-api', {
-                    versionRange = ">=${this.libs.versions.fabric.api.split(/\+/)[0]}"
-                }
-            }
-        }
-
-        onForge {
-            dependencies = dependencies.collect { dep ->
-                new Dependency() {
-                    @Override
-                    Map asForgeMap() {
-                        def map = dep.asForgeMap()
-                        map.remove('mandatory')
-                        map.put('type', this.mandatory ? 'required' : 'optional')
-                        return map
-                    }
+                    versionRange = ">=${libs.versions.fabric_api.split(/\+/)[0]}"
                 }
             }
         }
     }
+
     onFabric {
         mixin = [
             'mixin.defaultresources.fabriquilt.json',
             'mixin.defaultresources.json'
         ]
     }
-    onForge {
+    onNeoForge {
         mixins = [
             ['config':'mixin.defaultresources.json']
         ]

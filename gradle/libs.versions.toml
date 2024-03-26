@@ -8,11 +8,9 @@ neoforge = "20.4.80-beta"
 fabric_loader = "0.15.3"
 fabric_api = "0.92.1+1.20.4"
 
-mdg_plugin = "1.4.3"
-mdg_dsl = "1.5.1"
+mdg = "2.0.0-beta.17"
 
 architectury_loom = "1.4.373"
-quilt_licenser = "2.0.1"
 
 [libraries]
 minecraft = { module = "com.mojang:minecraft", version.ref = "minecraft" }
@@ -24,6 +22,5 @@ neoforge = { module = "net.neoforged:neoforge", version.ref = "neoforge" }
 
 [plugins]
 
-mdg_plugin = { id = "org.groovymc.modsdotgroovy", version.ref = "mdg_plugin" }
-quilt_licenser = { id = "org.quiltmc.gradle.licenser", version.ref = "quilt_licenser" }
+mdg = { id = "org.groovymc.modsdotgroovy", version.ref = "mdg" }
 architectury_loom = { id = "dev.architectury.loom", version.ref = "architectury_loom" }

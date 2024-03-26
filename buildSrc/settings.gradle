@@ -1,0 +1,13 @@
+pluginManagement {
+    repositories {
+        maven {
+            name = "Luke's Maven"
+            url = 'https://maven.lukebemish.dev/releases'
+        }
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    id 'dev.lukebemish.conventions'
+}

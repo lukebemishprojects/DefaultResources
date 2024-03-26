@@ -1,9 +1,20 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id 'idea'
-    id 'dev.lukebemish.conventions.project'
+    id 'signing'
+    id 'dev.lukebemish.conventions.java'
+    id 'dev.lukebemish.managedversioning'
 }
+
+managedVersioning {
+    versionFile.set project.rootDir.toPath().resolve('version.properties').toFile()
+    gitWorkingDir.set project.rootDir
+    metadataVersion.set libs.versions.minecraft
+    versionPRs()
+    versionSnapshots()
+}
+
+managedVersioning.apply()
 
 version = rootProject.version
 group = rootProject.group
@@ -43,16 +54,32 @@ dependencies {
 publishing {
     publications {
         register('mavenJava', MavenPublication) {
-            artifactId base.archivesName.get()
+            artifactId "$artifact_id-${project.name}"
             from components.java
+            managedVersioning.publishing.sign(signing, it)
+            managedVersioning.publishing.pom(it, github_repo, license)
+            pom {
+                name = "$mod_id - ${project.name}"
+                description = mod_description
+            }
         }
     }
 }
+
+managedVersioning.publishing.mavenPullRequest(publishing)
+managedVersioning.publishing.mavenSnapshot(publishing)
 
 sourcesJar {
     dependsOn(configurations.rootProjectLicense)
     from(configurations.rootProjectLicense) {
         rename { "${it}_${artifact_id}" }
+    }
+}
+
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each {
+    configurations."$it".outgoing {
+        capability("$group:$artifact_id:$version")
+        capability("$group:$artifact_id-${project.name}:$version")
     }
 }
 
@@ -64,13 +91,15 @@ jar {
 
     manifest {
         attributes([
-            'Specification-Title'     : mod_name,
-            'Specification-Vendor'    : mod_author,
-            'Specification-Version'   : rootProject.version,
-            'Implementation-Title'    : "$mod_name - ${project.name}",
-            'Implementation-Version'  : rootProject.version,
-            'Implementation-Vendor'   : mod_author,
-            'Built-On-Minecraft'      : libs.versions.minecraft.get()
+            'Specification-Title'       : mod_name,
+            'Specification-Vendor'      : mod_author,
+            'Specification-Version'     : rootProject.version,
+            'Implementation-Title'      : "$mod_name - ${project.name}",
+            'Implementation-Version'    : rootProject.version,
+            'Implementation-Vendor'     : mod_author,
+            'Implementation-Commit-Time': managedVersioning.timestamp.get(),
+            'Implementation-Commit'     : managedVersioning.hash.get(),
+            'Built-On-Minecraft'        : libs.versions.minecraft.get()
         ])
     }
 }

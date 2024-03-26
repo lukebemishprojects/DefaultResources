@@ -38,3 +38,9 @@ tasks.named("sourcesJar", Jar) {
     dependsOn(configurations.commonResources)
     from(configurations.commonResources)
 }
+
+['apiElements', 'runtimeElements', 'sourcesElements', 'javadocElements'].each {
+    configurations."$it".outgoing {
+        capability("$group:$artifact_id-common:$version")
+    }
+}

@@ -1,12 +1,11 @@
 plugins {
-    alias libs.plugins.quilt.licenser apply false
-    alias libs.plugins.mdg.plugin
-    alias libs.plugins.managedversioning
+    alias libs.plugins.mdg apply false
+    alias cLibs.plugins.managedversioning
     alias libs.plugins.architectury.loom apply false
 }
 
 managedVersioning {
-    versionFile.set rootProject.file('version.properties')
+    versionFile.set project.file('version.properties')
     metadataVersion.set libs.versions.minecraft
     versionPRs()
     versionSnapshots()
@@ -19,7 +18,7 @@ managedVersioning {
             gradleJob {
                 buildCache()
                 name.set 'build'
-                gradlew 'Build', 'checkLicenses', 'build'
+                gradlew 'Build', 'build'
                 gradlew 'Publish', 'publish'
                 mavenSnapshot('github')
             }
@@ -35,12 +34,19 @@ managedVersioning {
                 }
                 readOnly.set false
                 gradlew 'Tag Release', 'tagRelease'
-                gradlew 'Build', 'checkLicenses', 'build'
+                gradlew 'Build', 'build'
                 step {
                     run.set 'git push && git push --tags'
                 }
-                gradlew 'Publish', 'publish'
-                mavenRelease('github')
+                recordVersion 'Record Version', 'version'
+            }
+            gradleJob {
+                buildCache()
+                name.set 'publish'
+                needs.add('build')
+                tag.set('${{needs.build.outputs.version}}')
+                gradlew 'Publish', 'publish', 'closeAndReleaseSonatypeStagingRepository'
+                mavenCentral()
                 modPublishing()
             }
         }
@@ -49,7 +55,7 @@ managedVersioning {
             pullRequest.set(true)
             gradleJob {
                 name.set 'build'
-                gradlew 'Build', 'checkLicenses', 'build'
+                gradlew 'Build', 'build'
                 gradlew 'Publish', 'publish'
                 pullRequestArtifact()
             }
@@ -80,41 +86,4 @@ artifacts {
     add 'license', file("LICENSE")
 }
 
-modsDotGroovy {
-    dslVersion = libs.versions.mdg.dsl.get()
-    platform 'multiloader'
-    multiloader {
-        forge = [project(":neoforge")]
-        fabric = [project(":fabriquilt")]
-        quilt = []
-    }
-}
-
-subprojects { p ->
-    apply plugin: 'maven-publish'
-    apply plugin: 'java-library'
-    apply plugin: libs.plugins.quilt.licenser.get().pluginId
-
-    java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-    java.withSourcesJar()
-    java.withJavadocJar()
-
-    license {
-        rule rootProject.file('header.txt')
-        exclude '**/*.mcmeta'
-        exclude '**/package-info.java'
-    }
-
-    jar {
-        manifest {
-            attributes([
-                'Implementation-Commit-Time': managedVersioning.timestamp.get(),
-                'Implementation-Commit': managedVersioning.hash.get()
-            ])
-        }
-    }
-
-    managedVersioning.publishing.mavenPullRequest(publishing)
-    managedVersioning.publishing.mavenSnapshot(publishing)
-    managedVersioning.publishing.mavenRelease(publishing)
-}
+managedVersioning.publishing.mavenCentral()
