@@ -47,7 +47,7 @@ managedVersioning {
                 tag.set('${{needs.build.outputs.version}}')
                 gradlew 'Publish', 'publish', 'closeAndReleaseSonatypeStagingRepository'
                 mavenCentral()
-                modPublishing()
+                sign()
             }
         }
         build_pr {

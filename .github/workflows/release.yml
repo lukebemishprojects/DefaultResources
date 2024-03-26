@@ -125,8 +125,8 @@
                         "BUILD_CACHE_URL": "${{ secrets.BUILD_CACHE_URL }}",
                         "SONATYPE_PASSWORD": "${{ secrets.SONATYPE_PASSWORD }}",
                         "SONATYPE_USER": "${{ secrets.SONATYPE_USER }}",
-                        "CURSEFORGE_KEY": "${{ secrets.CURSEFORGE_KEY }}",
-                        "MODRINTH_KEY": "${{ secrets.MODRINTH_KEY }}"
+                        "GPG_KEY": "${{ secrets.GPG_KEY }}",
+                        "GPG_PASSWORD": "${{ secrets.GPG_PASSWORD }}"
                     }
                 }
             ]
