@@ -40,14 +40,14 @@ MultiplatformModsDotGroovy.make {
     }
 
     onFabric {
-        mixin = [
-            'mixin.defaultresources.fabriquilt.json',
-            'mixin.defaultresources.json'
-        ]
+        mixins {
+            mixin 'mixin.defaultresources.fabriquilt.json'
+            mixin 'mixin.defaultresources.json'
+        }
     }
     onNeoForge {
-        mixins = [
-            ['config':'mixin.defaultresources.json']
-        ]
+        mixins {
+            mixin 'mixin.defaultresources.json'
+        }
     }
 }
